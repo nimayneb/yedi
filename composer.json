@@ -1,0 +1,23 @@
+{
+    "name": "nimayneb/yedi",
+    "license": "GPL-3.0-or-later",
+    "type": "library",
+    "description": "Yet enough dependency injector",
+    "keywords": ["dependency", "injection", "injector", "inject", "container", "psr-11", "di"],
+    "authors": [
+        {
+            "name": "Jan Runte",
+            "email": "github-1601@nimayneb.de"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "JayBeeR\\YEDI\\": "Classes/"
+        }
+    },
+    "require": {
+        "php": "^7.4",
+        "php-ds/php-ds": "^1.2",
+        "psr/container": "^1.0"
+    }
+}
