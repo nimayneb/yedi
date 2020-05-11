@@ -5,13 +5,14 @@ namespace JayBeeR\YEDI\Failures {
     use Exception;
     use ReflectionClass;
 
-    class WrongAmountOfArgumentForDependencyResolution extends Exception
+    class WrongArgumentsForDependencyResolution extends Exception
     {
         /**
          * @param ReflectionClass $reflectedClass
          * @param array $arguments
+         * @param array $restArguments
          */
-        public function __construct(ReflectionClass $reflectedClass, array $arguments)
+        public function __construct(ReflectionClass $reflectedClass, array $arguments, array $restArguments)
         {
             parent::__construct(
                 sprintf(

@@ -29,11 +29,11 @@ namespace JayBeeR\YEDI\Container {
          *
          * @param mixed $className Identifier of the entry to look for.
          *
-         * @return array Entry.
+         * @return Arguments Entry.
          * @throws InvalidTypeForDependencyIdentifier Error while retrieving the entry.
          * @throws DependencyIdentifierNotFound  No entry was found for **this** identifier.
          */
-        public function get($className): array
+        public function get($className): Arguments
         {
             if (!$this->has($className)) {
                 throw new DependencyIdentifierNotFound($className);
@@ -63,92 +63,86 @@ namespace JayBeeR\YEDI\Container {
         }
 
         /**
-         * @param string $ariseClassName
+         * @param string $derivedClassName
          *
          * @return Arguments
          */
-        public function for(string $ariseClassName)
+        public function for(string $derivedClassName)
         {
-            $this->resolvesDependencies->put(
-                $ariseClassName,
+            if (!$this->resolvesDependencies->hasKey($derivedClassName)) {
+                $this->resolvesDependencies->put(
+                    $derivedClassName,
 
-                new class ($this) implements Arguments {
-                    /**
-                     * @var array
-                     */
-                    protected array $arguments = [];
+                    new class () implements Arguments {
+                        /**
+                         * @var array
+                         */
+                        protected array $arguments = [];
 
-                    protected Arguments $container;
+                        /**
+                         * @param string $argumentName
+                         *
+                         * @return ArgumentResolution
+                         */
+                        public function setArgument(string $argumentName): ArgumentResolution
+                        {
+                            return new class($this->arguments, $argumentName, $this) implements ArgumentResolution {
+                                protected string $argumentName;
 
-                    public function __construct(Arguments $container)
-                    {
-                        $this->container = $container;
+                                protected array $arguments;
+
+                                protected Arguments $container;
+
+                                /**
+                                 * @param array $arguments
+                                 * @param string $argumentName
+                                 * @param Arguments $container
+                                 */
+                                public function __construct(array &$arguments, string $argumentName, Arguments $container)
+                                {
+                                    $this->arguments = &$arguments;
+                                    $this->argumentName = $argumentName;
+                                    $this->container = $container;
+                                }
+
+                                /**
+                                 * @param $className
+                                 *
+                                 * @return Arguments
+                                 */
+                                public function asInjection(string $className): Arguments
+                                {
+                                    $this->arguments[$this->argumentName] = $className;
+
+                                    return $this->container;
+                                }
+
+                                /**
+                                 * @param mixed $value
+                                 *
+                                 * @return Arguments
+                                 */
+                                public function asValue($value): Arguments
+                                {
+                                    $this->arguments[$this->argumentName] = $value;
+
+                                    return $this->container;
+                                }
+                            };
+                        }
+
+                        /**
+                         * @return array
+                         */
+                        public function getArguments(): array
+                        {
+                            return $this->arguments;
+                        }
                     }
+                );
+            }
 
-                    /**
-                     * @param string $argumentName
-                     *
-                     * @return ArgumentResolution
-                     */
-                    public function setArgument(string $argumentName): ArgumentResolution
-                    {
-                        $this->arguments[$argumentName] = [];
-
-                        return new class($this->arguments[$argumentName], $this->container) implements ArgumentResolution {
-                            /**
-                             * @var mixed
-                             */
-                            protected $argumentValue;
-
-                            protected Arguments $container;
-
-                            /**
-                             * @param string $argumentName
-                             * @param Arguments $container
-                             */
-                            public function __construct(string &$argumentName, Arguments $container)
-                            {
-                                $this->argumentValue = &$argumentName;
-                                $this->container = $container;
-                            }
-
-                            /**
-                             * @param $className
-                             *
-                             * @return Arguments
-                             */
-                            public function asInjection(string $className): Arguments
-                            {
-                                $this->argumentValue = $className;
-
-                                return $this->container;
-                            }
-
-                            /**
-                             * @param mixed $value
-                             *
-                             * @return Arguments
-                             */
-                            public function asValue($value): Arguments
-                            {
-                                $this->argumentValue = $value;
-
-                                return $this->container;
-                            }
-                        };
-                    }
-
-                    /**
-                     * @return array
-                     */
-                    public function getArguments(): array
-                    {
-                        return $this->arguments;
-                    }
-                }
-            );
-
-            return $this->resolvesDependencies->get($ariseClassName);
+            return $this->resolvesDependencies->get($derivedClassName);
         }
     }
 }

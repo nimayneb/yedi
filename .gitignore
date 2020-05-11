@@ -3,3 +3,4 @@ composer.lock
 .idea
 *.log
 .DS_Store
+.phpunit*

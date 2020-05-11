@@ -83,6 +83,10 @@ But you have more support with YEDI. Continue reading.
 The resolution container should be used for the instantiating of a dependency class with concrete constructor
  arguments. 
 
+    class MyClass {
+        public function __construct(string $name, Foreign\HelperInterface $helper, int $limit, bool $hidden);
+    }
+
     $dr = new JayBeeR\YEDI\DependencyResolutionContainer();
     $dr->for(ForeignClass::class)
         ->setArgument('limit')  ->asValue(123)
@@ -139,7 +143,7 @@ You can now instantiate with the simple class name:
  
 ## Wishlist
 
-- Validation of interface, (abstract) classes and traits
-- Throws more Exceptions
-- Support of anti-pattern "Singleton"
+- Throws more Exceptions?
+- Support of Singleton-like instantiation without interface (every class can be a Singleton)
 - Refactoring and renaming things (clear interface)
+- Tests for all exceptions

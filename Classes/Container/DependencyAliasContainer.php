@@ -4,8 +4,11 @@ namespace JayBeeR\YEDI\Container {
 
     use Ds\Map;
     use JayBeeR\YEDI\AliasTo;
+    use JayBeeR\YEDI\Failures\CannotFindClassName;
+    use JayBeeR\YEDI\Failures\CannotInstantiateAbstractClass;
     use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
     use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
+    use JayBeeR\YEDI\Reflection;
     use Psr\Container\ContainerInterface;
 
     /**
@@ -69,13 +72,16 @@ namespace JayBeeR\YEDI\Container {
         }
 
         /**
-         * @param $className
+         * @param $fullyClassName
          *
          * @return AliasTo
+         * @throws CannotFindClassName
          */
-        public function delegate($className): AliasTo
+        public function delegate($fullyClassName): AliasTo
         {
-            return new class ($this->aliases, $className) implements AliasTo {
+            Reflection::assertValidObjectName($fullyClassName);
+
+            return new class ($this->aliases, $fullyClassName) implements AliasTo {
 
                 protected Map $aliases;
 
@@ -92,11 +98,24 @@ namespace JayBeeR\YEDI\Container {
                 }
 
                 /**
-                 * @param string $className
+                 * @param string $fullyClassName
                  */
-                public function to(string $className): void
+                public function to(string $fullyClassName): void
                 {
-                    $this->aliases->put($this->fromClassName, $className);
+                    if (!class_exists($fullyClassName)) {
+                        throw new CannotFindClassName($fullyClassName);
+                    }
+
+                    $reflectedClass = Reflection::from($fullyClassName);
+
+                    if ($reflectedClass->isAbstract()) {
+                        throw new CannotInstantiateAbstractClass($reflectedClass);
+                    }
+
+                    // There is no need to check whether an abstract class, an interface or a trait has been used,
+                    // because this will be checked during instantiation.
+
+                    $this->aliases->put($this->fromClassName, $fullyClassName);
                 }
             };
         }

@@ -12,14 +12,42 @@ namespace JayBeeR\YEDI\Failures {
          */
         public function __construct($identifier)
         {
-            $type = gettype($identifier);
-
             parent::__construct(
                 sprintf(
                     'Dependency identifier <%s> not found.',
-                    ('object' === $type) ? get_class($identifier) : $type
+                    $this->getNamedIdentifier($identifier)
                 )
             );
+        }
+
+        /**
+         * @param mixed $identifier
+         *
+         * @return string
+         */
+        protected function getNamedIdentifier($identifier): string
+        {
+            $name = gettype($identifier);
+
+            switch ($name) {
+                case 'object':
+                {
+                    $name = get_class($name);
+
+                    break;
+                }
+
+                case 'string':
+                {
+                    $name = $identifier;
+
+                    break;
+                }
+
+                default;
+            }
+
+            return $name;
         }
 
         /**

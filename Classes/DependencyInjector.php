@@ -9,12 +9,14 @@ namespace JayBeeR\YEDI {
     use IteratorAggregate;
     use JayBeeR\YEDI\Container\DependencyAliasContainer;
     use JayBeeR\YEDI\Container\DependencyResolutionContainer;
+    use JayBeeR\YEDI\Failures\CannotFindClassName;
+    use JayBeeR\YEDI\Failures\CannotInstantiateAbstractClass;
     use JayBeeR\YEDI\Failures\CannotReflectClass;
     use JayBeeR\YEDI\Failures\ClassNameIsIncorrectlyCapitalized;
     use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
     use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
     use JayBeeR\YEDI\Failures\InvalidTypeForDependencyInjection;
-    use JayBeeR\YEDI\Failures\WrongAmountOfArgumentForDependencyResolution;
+    use JayBeeR\YEDI\Failures\WrongArgumentsForDependencyResolution;
     use ReflectionClass;
     use ReflectionParameter;
     use Serializable;
@@ -28,7 +30,7 @@ namespace JayBeeR\YEDI {
      */
     class DependencyInjector
     {
-        protected DependencyResolutionContainer $resolverContainer;
+        protected DependencyResolutionContainer $resolutionContainer;
 
         protected DependencyAliasContainer $aliasesContainer;
 
@@ -42,7 +44,7 @@ namespace JayBeeR\YEDI {
         )
         {
             $this->aliasesContainer = $aliasesContainer ?? new DependencyAliasContainer;
-            $this->resolverContainer = $resolverContainer ?? new DependencyResolutionContainer;
+            $this->resolutionContainer = $resolverContainer ?? new DependencyResolutionContainer;
         }
 
         /**
@@ -54,9 +56,10 @@ namespace JayBeeR\YEDI {
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
-         * @throws WrongAmountOfArgumentForDependencyResolution
+         * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotFindClassName
          */
-        public function resolveType(ReflectionParameter $reflectedParameter): object
+        protected function resolveType(ReflectionParameter $reflectedParameter): object
         {
             $fullyClassName = $reflectedParameter->getType()->getName();
 
@@ -112,47 +115,62 @@ namespace JayBeeR\YEDI {
          * @throws InvalidTypeForDependencyInjection
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
-         * @throws WrongAmountOfArgumentForDependencyResolution
+         * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotFindClassName
          */
-        public function resolveClass(ReflectionClass $reflectedClass, string $derivedClassName): object
+        protected function resolveClass(ReflectionClass $reflectedClass, string $derivedClassName): object
         {
-            if (!$this->resolverContainer->has($derivedClassName)) {
-                $dependencyInjections = [];
-
-                foreach ($reflectedClass->getConstructor()->getParameters() as $reflectedParameter) {
-                    if (!$reflectedParameter->isOptional()) {
-                        break;
-                    }
-
-                    $fullyClassName = $reflectedParameter->getType()->getName();
-
-                    $this->resolverContainer
-                        ->for($derivedClassName)
-                        ->setArgument($reflectedParameter->getName())
-                        ->asInjection($fullyClassName)
-                    ;
-
-                    $dependencyInjections[] = $this->resolveType($reflectedParameter);
-                }
-
-                $arguments = $this->resolverContainer->get($derivedClassName);
-            } else {
-                $arguments = $this->resolverContainer->get($derivedClassName);
-
-                $min = $reflectedClass->getConstructor()->getNumberOfRequiredParameters();
-                $max = count($reflectedClass->getConstructor()->getParameters());
-                $count = count($arguments);
-
-                if ($min > $count || $max < $count) {
-                    throw new WrongAmountOfArgumentForDependencyResolution($reflectedClass, $arguments);
-                }
-            }
+            $arguments = $this->resolveArguments($reflectedClass, $derivedClassName);
 
             return $reflectedClass->newInstance(...$arguments);
         }
 
         /**
-         * @param string $className
+         * @param ReflectionClass $reflectedClass
+         * @param string $derivedClassName
+         *
+         * @return array
+         * @throws CannotFindClassName
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         * @throws InvalidTypeForDependencyInjection
+         * @throws WrongArgumentsForDependencyResolution
+         */
+        protected function resolveArguments(ReflectionClass $reflectedClass, string $derivedClassName)
+        {
+            $classNameContainer = $this->resolutionContainer->for($derivedClassName);
+            $argumentsExists = $this->resolutionContainer->get($derivedClassName)->getArguments();
+            $arguments = [];
+
+            foreach ($reflectedClass->getConstructor()->getParameters() as $reflectedParameter) {
+                $parameterName = $reflectedParameter->getName();
+
+                if (
+                    ($reflectedParameter->isOptional())
+                    && (false === array_key_exists($parameterName, $argumentsExists))
+                ) {
+                    break;
+                }
+
+                unset($argumentsExists[$parameterName]);
+
+                $fullyClassName = $reflectedParameter->getType()->getName();
+                $classNameContainer->setArgument($parameterName)->asInjection($fullyClassName);
+
+                $arguments[] = $this->resolveType($reflectedParameter);
+            }
+
+            if (count($argumentsExists)) {
+                throw new WrongArgumentsForDependencyResolution($reflectedClass, $argumentsExists, $arguments);
+            }
+
+            return $arguments;
+        }
+
+        /**
+         * @param string $fullyClassName
          *
          * @return mixed
          * @throws CannotReflectClass
@@ -160,15 +178,18 @@ namespace JayBeeR\YEDI {
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
-         * @throws WrongAmountOfArgumentForDependencyResolution
+         * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotFindClassName
          */
-        public function get(string $className): object
+        public function get(string $fullyClassName): object
         {
-            if ($this->aliasesContainer->has($className)) {
-                $className = $this->aliasesContainer->get($className);
+            Reflection::assertValidObjectName($fullyClassName);
+
+            if ($this->aliasesContainer->has($fullyClassName)) {
+                $fullyClassName = $this->aliasesContainer->get($fullyClassName);
             }
 
-            $reflectedClass = Reflection::create($className);
+            $reflectedClass = Reflection::from($fullyClassName);
 
             if (
                 (null === $reflectedClass->getConstructor())
@@ -176,10 +197,31 @@ namespace JayBeeR\YEDI {
             ) {
                 $object = $reflectedClass->newInstance();
             } else {
-                $object = $this->resolveClass($reflectedClass, $className);
+                $object = $this->resolveClass($reflectedClass, $fullyClassName);
             }
 
             return $object;
+        }
+
+        /**
+         * @param string $className
+         *
+         * @return AliasTo
+         * @throws CannotFindClassName
+         */
+        public function delegate(string $className): AliasTo
+        {
+            return $this->aliasesContainer->delegate($className);
+        }
+
+        /**
+         * @param string $className
+         *
+         * @return Arguments
+         */
+        public function for(string $className): Arguments
+        {
+            return $this->resolutionContainer->for($className);
         }
     }
 } 

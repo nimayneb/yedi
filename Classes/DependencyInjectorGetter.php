@@ -8,7 +8,7 @@ namespace JayBeeR\YEDI {
     use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
     use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
     use JayBeeR\YEDI\Failures\InvalidTypeForDependencyInjection;
-    use JayBeeR\YEDI\Failures\WrongAmountOfArgumentForDependencyResolution;
+    use JayBeeR\YEDI\Failures\WrongArgumentsForDependencyResolution;
 
     trait DependencyInjectorGetter
     {
@@ -23,7 +23,7 @@ namespace JayBeeR\YEDI {
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
-         * @throws WrongAmountOfArgumentForDependencyResolution
+         * @throws WrongArgumentsForDependencyResolution
          */
         protected function get(string $fullyClassName): object
         {

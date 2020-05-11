@@ -6,8 +6,8 @@ namespace JayBeeR\YEDI {
     interface AliasTo
     {
         /**
-         * @param string $className
+         * @param string $fullyClassName
          */
-        public function to(string $className): void;
+        public function to(string $fullyClassName): void;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace JayBeeR\YEDI {
 
+    use JayBeeR\YEDI\Failures\CannotFindClassName;
     use JayBeeR\YEDI\Failures\CannotReflectClass;
     use JayBeeR\YEDI\Failures\ClassNameIsIncorrectlyCapitalized;
     use ReflectionClass;
@@ -16,7 +17,7 @@ namespace JayBeeR\YEDI {
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          */
-        public static function create($fullyClassName): ReflectionClass
+        public static function from($fullyClassName): ReflectionClass
         {
             try {
                 $reflectedClass = new ReflectionClass($fullyClassName);
@@ -29,6 +30,22 @@ namespace JayBeeR\YEDI {
             }
 
             return $reflectedClass;
+        }
+
+        /**
+         * @param string $fullyClassName
+         *
+         * @throws CannotFindClassName
+         */
+        public static function assertValidObjectName(string $fullyClassName): void
+        {
+            if (
+                (!class_exists($fullyClassName))
+                && (!interface_exists($fullyClassName))
+                && (!trait_exists($fullyClassName))
+            ) {
+                throw new CannotFindClassName($fullyClassName);
+            }
         }
     }
 } 
