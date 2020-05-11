@@ -29,7 +29,7 @@ namespace JayBeeR\Tests {
     {
         protected DependencyInjector $di;
 
-        public function setUp()
+        protected function setUp()
         {
             $this->di = new DependencyInjector();
         }
@@ -169,7 +169,7 @@ namespace JayBeeR\Tests {
         // public function __construct($variable = 'abc');
         // public function __construct(int $variable = 123);
 
-        public function tearDown()
+        protected function tearDown()
         {
             unset($this->di);
         }
