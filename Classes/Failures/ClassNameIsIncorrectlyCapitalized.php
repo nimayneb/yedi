@@ -8,13 +8,13 @@ namespace JayBeeR\YEDI\Failures {
     class ClassNameIsIncorrectlyCapitalized extends Exception
     {
         /**
-         * @param string $className
+         * @param string $fullyClassName
          * @param ReflectionClass $reflectedClass
          */
-        public function __construct(string $className, ReflectionClass $reflectedClass)
+        public function __construct(string $fullyClassName, ReflectionClass $reflectedClass)
         {
             parent::__construct(
-                sprintf('Class name <%s> is incorrectly capitalized, must be <%s>', $className, $reflectedClass->getName())
+                sprintf('Class name <%s> is incorrectly capitalized, must be <%s>', $fullyClassName, $reflectedClass->getName())
             );
         }
 

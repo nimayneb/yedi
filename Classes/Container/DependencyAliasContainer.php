@@ -34,20 +34,20 @@ namespace JayBeeR\YEDI\Container {
         /**
          * Finds an entry of the container by its identifier and returns it.
          *
-         * @param mixed $className Identifier of the entry to look for.
+         * @param mixed $fullyClassName Identifier of the entry to look for.
          *
          * @return string Entry.
          * @throws InvalidTypeForDependencyIdentifier Error while retrieving the entry.
          * @throws DependencyIdentifierNotFound  No entry was found for **this** identifier.
          */
-        public function get($className): string
+        public function get($fullyClassName): string
         {
             // TODO: PSR-11 for PHP 7.4?
-            if (!$this->has($className)) {
-                throw new DependencyIdentifierNotFound($className);
+            if (!$this->has($fullyClassName)) {
+                throw new DependencyIdentifierNotFound($fullyClassName);
             }
 
-            return $this->aliases->get($className);
+            return $this->aliases->get($fullyClassName);
         }
 
         /**
@@ -56,19 +56,19 @@ namespace JayBeeR\YEDI\Container {
          * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
          * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
          *
-         * @param mixed $className Identifier of the entry to look for.
+         * @param mixed $fullyClassName Identifier of the entry to look for.
          *
          * @return bool
          * @throws InvalidTypeForDependencyIdentifier Error while retrieving the entry.
          */
-        public function has($className): bool
+        public function has($fullyClassName): bool
         {
             // TODO: PSR-11 for PHP 7.4?
-            if (!is_string($className)) {
-                throw new InvalidTypeForDependencyIdentifier($className);
+            if (!is_string($fullyClassName)) {
+                throw new InvalidTypeForDependencyIdentifier($fullyClassName);
             }
 
-            return $this->aliases->hasKey($className);
+            return $this->aliases->hasKey($fullyClassName);
         }
 
         /**

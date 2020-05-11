@@ -10,12 +10,12 @@ namespace JayBeeR\YEDI\Failures {
     class CannotReflectClass extends Exception
     {
         /**
-         * @param string $className
+         * @param string $fullyClassName
          */
-        public function __construct(string $className)
+        public function __construct(string $fullyClassName)
         {
             parent::__construct(
-                sprintf('Cannot reflect class <%s>', $className)
+                sprintf('Cannot reflect class <%s>', $fullyClassName)
             );
         }
 

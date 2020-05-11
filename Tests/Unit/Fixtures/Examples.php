@@ -2,7 +2,7 @@
 
 namespace JayBeeR\Tests\Unit\Fixtures {
 
-    use JayBeeR\YEDI\DependencyInjectorGetter;
+    use JayBeeR\YEDI\DependencyInjectorConstructor;
 
     class MyClassA
     {
@@ -42,27 +42,27 @@ namespace JayBeeR\Tests\Unit\Fixtures {
         }
     }
 
-    class MyClassA_DI
+    class MyClassA_YEDI
     {
-        use DependencyInjectorGetter;
+        use DependencyInjectorConstructor;
 
         public MyClassA $myClassA;
 
-        public function __construct()
+        public function injectDependencies()
         {
             $this->myClassA = $this->get(MyClassA::class);
         }
     }
 
-    class MyClassB_DI
+    class MyClassB_YEDI
     {
-        use DependencyInjectorGetter;
+        use DependencyInjectorConstructor;
 
-        public MyClassA_DI $myClassA_DI;
+        public MyClassA_YEDI $myClassA_YEDI;
 
-        public function __construct()
+        public function injectDependencies()
         {
-            $this->myClassA_DI = $this->get(MyClassA_DI::class);
+            $this->myClassA_YEDI = $this->get(MyClassA_YEDI::class);
         }
     }
 

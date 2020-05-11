@@ -5,8 +5,12 @@ namespace JayBeeR\YEDI\Container {
     use Ds\Map;
     use JayBeeR\YEDI\Arguments;
     use JayBeeR\YEDI\ArgumentResolution;
+    use JayBeeR\YEDI\Failures\CannotFindClassName;
     use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
     use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
+    use JayBeeR\YEDI\Injector;
+    use JayBeeR\YEDI\Reflection;
+    use JayBeeR\YEDI\Singleton;
     use Psr\Container\ContainerInterface;
 
     /**
@@ -27,19 +31,19 @@ namespace JayBeeR\YEDI\Container {
         /**
          * Finds an entry of the container by its identifier and returns it.
          *
-         * @param mixed $className Identifier of the entry to look for.
+         * @param mixed $fullyClassName Identifier of the entry to look for.
          *
          * @return Arguments Entry.
          * @throws InvalidTypeForDependencyIdentifier Error while retrieving the entry.
          * @throws DependencyIdentifierNotFound  No entry was found for **this** identifier.
          */
-        public function get($className): Arguments
+        public function get($fullyClassName): Arguments
         {
-            if (!$this->has($className)) {
-                throw new DependencyIdentifierNotFound($className);
+            if (!$this->has($fullyClassName)) {
+                throw new DependencyIdentifierNotFound($fullyClassName);
             }
 
-            return $this->resolvesDependencies->get($className);
+            return $this->resolvesDependencies->get($fullyClassName);
         }
 
         /**
@@ -48,27 +52,30 @@ namespace JayBeeR\YEDI\Container {
          * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
          * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
          *
-         * @param mixed $className Identifier of the entry to look for.
+         * @param mixed $fullyClassName Identifier of the entry to look for.
          *
          * @return bool
          * @throws InvalidTypeForDependencyIdentifier Error while retrieving the entry.
          */
-        public function has($className): bool
+        public function has($fullyClassName): bool
         {
-            if (!is_string($className)) {
-                throw new InvalidTypeForDependencyIdentifier($className);
+            if (!is_string($fullyClassName)) {
+                throw new InvalidTypeForDependencyIdentifier($fullyClassName);
             }
 
-            return $this->resolvesDependencies->hasKey($className);
+            return $this->resolvesDependencies->hasKey($fullyClassName);
         }
 
         /**
          * @param string $derivedClassName
          *
          * @return Arguments
+         * @throws CannotFindClassName
          */
         public function for(string $derivedClassName)
         {
+            Reflection::assertValidObjectName($derivedClassName);
+
             if (!$this->resolvesDependencies->hasKey($derivedClassName)) {
                 $this->resolvesDependencies->put(
                     $derivedClassName,
@@ -106,13 +113,35 @@ namespace JayBeeR\YEDI\Container {
                                 }
 
                                 /**
-                                 * @param $className
+                                 * @param $fullyClassName
                                  *
                                  * @return Arguments
                                  */
-                                public function asInjection(string $className): Arguments
+                                public function asInjection(?string $fullyClassName): Arguments
                                 {
-                                    $this->arguments[$this->argumentName] = $className;
+                                    $this->arguments[$this->argumentName] = new class($fullyClassName) implements Injector {
+                                        /**
+                                         * @var string
+                                         */
+                                        protected ?string $className;
+
+                                        /**
+                                         * @param string $fullyClassName
+                                         */
+                                        public function __construct(?string $fullyClassName) {
+                                            $this->className = $fullyClassName;
+                                        }
+
+                                        /**
+                                         * @param string $derivedClassName
+                                         *
+                                         * @return string
+                                         */
+                                        public function getClassName(string $derivedClassName): ?string
+                                        {
+                                            return $this->className ?? $derivedClassName;
+                                        }
+                                    };
 
                                     return $this->container;
                                 }
@@ -122,9 +151,47 @@ namespace JayBeeR\YEDI\Container {
                                  *
                                  * @return Arguments
                                  */
-                                public function asValue($value): Arguments
+                                public function to($value): Arguments
                                 {
                                     $this->arguments[$this->argumentName] = $value;
+
+                                    return $this->container;
+                                }
+
+                                /**
+                                 * @param string|null $fullyClassName
+                                 *
+                                 * @return Arguments
+                                 */
+                                public function asSingleton(?string $fullyClassName): Arguments
+                                {
+                                    if (!class_exists($fullyClassName)) {
+                                        throw new CannotFindClassName($fullyClassName);
+                                    }
+
+                                    $this->arguments[$this->argumentName] = new class($fullyClassName) implements Singleton {
+                                        /**
+                                         * @var string
+                                         */
+                                        protected ?string $className;
+
+                                        /**
+                                         * @param string $fullyClassName
+                                         */
+                                        public function __construct(?string $fullyClassName) {
+                                            $this->className = $fullyClassName;
+                                        }
+
+                                        /**
+                                         * @param string $derivedClassName
+                                         *
+                                         * @return string
+                                         */
+                                        public function getClassName(string $derivedClassName): ?string
+                                        {
+                                            return $this->className ?? $derivedClassName;
+                                        }
+                                    };
 
                                     return $this->container;
                                 }

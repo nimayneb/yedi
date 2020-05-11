@@ -7,12 +7,12 @@ namespace JayBeeR\YEDI\Failures {
     class CannotFindClassName extends Exception
     {
         /**
-         * @param string $className
+         * @param string $fullyClassName
          */
-        public function __construct(string $className)
+        public function __construct(string $fullyClassName)
         {
             parent::__construct(
-                sprintf('Cannot find class name <%s>', $className)
+                sprintf('Cannot find class name <%s>', $fullyClassName)
             );
         }
 

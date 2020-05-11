@@ -5,8 +5,12 @@ namespace JayBeeR\YEDI {
     use JayBeeR\YEDI\Failures\CannotFindClassName;
     use JayBeeR\YEDI\Failures\CannotReflectClass;
     use JayBeeR\YEDI\Failures\ClassNameIsIncorrectlyCapitalized;
+    use JayBeeR\YEDI\Failures\MissingTypeForArgument;
     use ReflectionClass;
     use ReflectionException;
+    use ReflectionNamedType;
+    use ReflectionParameter;
+    use ReflectionType;
 
     class Reflection
     {
@@ -46,6 +50,22 @@ namespace JayBeeR\YEDI {
             ) {
                 throw new CannotFindClassName($fullyClassName);
             }
+        }
+
+        /**
+         * @param ReflectionParameter $reflectedParameter
+         *
+         * @return ReflectionNamedType|ReflectionType
+         * @throws MissingTypeForArgument
+         */
+        public static function getNamedType(ReflectionParameter $reflectedParameter): ReflectionType
+        {
+            // TODO: PHP 8.0 variant return types?
+            if (null === $reflectedParameter->hasType()) {
+                throw new MissingTypeForArgument($reflectedParameter);
+            }
+
+            return $reflectedParameter->getType();
         }
     }
 } 

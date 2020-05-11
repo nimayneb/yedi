@@ -5,17 +5,24 @@ namespace JayBeeR\YEDI {
     interface ArgumentResolution
     {
         /**
-         * @param $className
+         * @param $fullyClassName
          *
          * @return Arguments
          */
-        public function asInjection(string $className): Arguments;
+        public function asInjection(string $fullyClassName): Arguments;
 
         /**
          * @param mixed $value
          *
          * @return Arguments
          */
-        public function asValue($value): Arguments;
+        public function to($value): Arguments;
+
+        /**
+         * @param string|null $fullyClassName
+         *
+         * @return Arguments
+         */
+        public function asSingleton(?string $fullyClassName): Arguments;
     }
 }

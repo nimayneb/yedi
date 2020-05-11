@@ -3,9 +3,9 @@
 namespace JayBeeR\Tests {
 
     use JayBeeR\Tests\Unit\Fixtures\MyClassA;
-    use JayBeeR\Tests\Unit\Fixtures\MyClassA_DI;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassA_YEDI;
     use JayBeeR\Tests\Unit\Fixtures\MyClassB;
-    use JayBeeR\Tests\Unit\Fixtures\MyClassB_DI;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassB_YEDI;
     use JayBeeR\Tests\Unit\Fixtures\MyClassC;
     use JayBeeR\Tests\Unit\Fixtures\MyClassH;
     use JayBeeR\YEDI\DependencyInjector;
@@ -15,8 +15,10 @@ namespace JayBeeR\Tests {
     use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
     use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
     use JayBeeR\YEDI\Failures\InvalidTypeForDependencyInjection;
+    use JayBeeR\YEDI\Failures\MissingTypeForArgument;
     use JayBeeR\YEDI\Failures\WrongArgumentsForDependencyResolution;
     use PHPUnit\Framework\TestCase;
+    use ReflectionException;
 
     class DependencyInjectorTest extends TestCase
     {
@@ -24,9 +26,7 @@ namespace JayBeeR\Tests {
 
         public function setUp()
         {
-            $this->di = new DependencyInjector;
-
-            parent::setUp();
+            $this->di = new DependencyInjector();
         }
 
         public function getDependenciesProvider(): array
@@ -35,8 +35,8 @@ namespace JayBeeR\Tests {
                 [ MyClassA::class ],
                 [ MyClassB::class ],
                 [ MyClassC::class ],
-                [ MyClassA_DI::class ],
-                [ MyClassB_DI::class ]
+                [ MyClassA_YEDI::class ],
+                [ MyClassB_YEDI::class ]
             ];
         }
 
@@ -49,6 +49,8 @@ namespace JayBeeR\Tests {
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException (cannot occur)
          * @throws WrongArgumentsForDependencyResolution
          *
          * @dataProvider getDependenciesProvider
@@ -65,7 +67,7 @@ namespace JayBeeR\Tests {
         {
             return [
                 [ MyClassB::class ],
-                [ MyClassA_DI::class ]
+                [ MyClassA_YEDI::class ]
             ];
         }
 
@@ -79,6 +81,8 @@ namespace JayBeeR\Tests {
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
          * @throws WrongArgumentsForDependencyResolution
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException (cannot occur)
          *
          * @dataProvider getDependenciesForAliasProvider
          * @test
@@ -90,14 +94,16 @@ namespace JayBeeR\Tests {
             $object = $this->di->get($className);
 
             $this->assertEquals($className, get_class($object));
-            $this->assertInstanceOf(MyClassH::class, $object->myClassA);
+            $this->assertInstanceOf(
+                MyClassH::class,
+                $object->myClassA,
+                sprintf('Current is <%s>', get_class($object->myClassA))
+            );
         }
 
         public function tearDown()
         {
             unset($this->di);
-
-            parent::tearDown();
         }
     }
 }
