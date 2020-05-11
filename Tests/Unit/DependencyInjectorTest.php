@@ -7,7 +7,12 @@ namespace JayBeeR\Tests {
     use JayBeeR\Tests\Unit\Fixtures\MyClassB;
     use JayBeeR\Tests\Unit\Fixtures\MyClassB_YEDI;
     use JayBeeR\Tests\Unit\Fixtures\MyClassC;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassE;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassF;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassG;
     use JayBeeR\Tests\Unit\Fixtures\MyClassH;
+    use JayBeeR\Tests\Unit\Fixtures\MyInterfacedClassA;
+    use JayBeeR\Tests\Unit\Fixtures\MyInterfacedClassB;
     use JayBeeR\YEDI\DependencyInjector;
     use JayBeeR\YEDI\Failures\CannotFindClassName;
     use JayBeeR\YEDI\Failures\CannotReflectClass;
@@ -41,6 +46,9 @@ namespace JayBeeR\Tests {
         }
 
         /**
+         * @dataProvider getDependenciesProvider
+         * @test
+         *
          * @param string $className
          *
          * @throws CannotFindClassName
@@ -50,17 +58,14 @@ namespace JayBeeR\Tests {
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
          * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
+         * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
-         *
-         * @dataProvider getDependenciesProvider
-         * @test
          */
         public function get_returnsDependency(string $className): void
         {
             $object = $this->di->get($className);
 
-            $this->assertEquals($className, get_class($object));
+            $this->assertInstanceOf($className, $object);
         }
 
         public function getDependenciesForAliasProvider(): array
@@ -72,6 +77,9 @@ namespace JayBeeR\Tests {
         }
 
         /**
+         * @dataProvider getDependenciesForAliasProvider
+         * @test
+         *
          * @param string $className
          *
          * @throws CannotFindClassName
@@ -80,12 +88,9 @@ namespace JayBeeR\Tests {
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
-         * @throws WrongArgumentsForDependencyResolution
          * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
-         *
-         * @dataProvider getDependenciesForAliasProvider
-         * @test
+         * @throws ReflectionException
+         * @throws WrongArgumentsForDependencyResolution
          */
         public function get_ifAliasIsSet_returnsDependency(string $className)
         {
@@ -93,13 +98,76 @@ namespace JayBeeR\Tests {
 
             $object = $this->di->get($className);
 
-            $this->assertEquals($className, get_class($object));
-            $this->assertInstanceOf(
-                MyClassH::class,
-                $object->myClassA,
-                sprintf('Current is <%s>', get_class($object->myClassA))
-            );
+            $this->assertInstanceOf($className, $object);
+            $this->assertInstanceOf(MyClassH::class, $object->myClassA);
         }
+
+        /**
+         * @test
+         *
+         * @throws CannotFindClassName
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         * @throws InvalidTypeForDependencyInjection
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException
+         * @throws WrongArgumentsForDependencyResolution
+         */
+        public function get_ifTwoResolutionsIsSet_returnsDependency()
+        {
+            $this->di->for(MyClassE::class)
+                ->setArgument('myInterfaceA')->asInjection(MyInterfacedClassA::class)
+            ;
+
+            $this->di->for(MyClassF::class)
+                ->setArgument('myInterfaceA')->asInjection(MyInterfacedClassB::class)
+            ;
+
+            $object = $this->di->get(MyClassE::class);
+
+            $this->assertInstanceOf(MyClassE::class, $object);
+            $this->assertInstanceOf(MyInterfacedClassA::class, $object->myInterfaceA);
+
+            $object = $this->di->get(MyClassF::class);
+
+            $this->assertInstanceOf(MyClassF::class, $object);
+            $this->assertInstanceOf(MyInterfacedClassB::class, $object->myInterfaceA);
+        }
+
+        /**
+         * @test
+         *
+         * @throws CannotFindClassName
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         * @throws InvalidTypeForDependencyInjection
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException
+         * @throws WrongArgumentsForDependencyResolution
+         */
+        public function get_ifResolutionIsSet_returnsDependency()
+        {
+            $this->di->for(MyClassG::class)
+                ->setArgument('myInterfaceA')->asInjection(MyInterfacedClassA::class)
+                ->setArgument('myInterfaceB')->asInjection(MyInterfacedClassB::class)
+            ;
+
+            $object = $this->di->get(MyClassG::class);
+
+            $this->assertInstanceOf(MyClassG::class, $object);
+            $this->assertInstanceOf(MyInterfacedClassA::class, $object->myInterfaceA);
+            $this->assertInstanceOf(MyInterfacedClassB::class, $object->myInterfaceB);
+        }
+
+        // public function __construct($variable);
+        // public function __construct(string $variable);
+        // public function __construct(Class $variable);
+        // public function __construct($variable = 'abc');
+        // public function __construct(int $variable = 123);
 
         public function tearDown()
         {
