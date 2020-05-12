@@ -1,23 +1,36 @@
 <?php declare(strict_types=1);
 
+/*
+ * This file belongs to the package "nimayneb.yawl".
+ * See LICENSE.txt that was shipped with this package.
+ */
+
 namespace JayBeeR\YEDI\Container {
 
     use Ds\Map;
-    use JayBeeR\YEDI\AliasTo;
-    use JayBeeR\YEDI\Failures\CannotFindClassName;
-    use JayBeeR\YEDI\Failures\CannotInstantiateAbstractClass;
-    use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
-    use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
-    use JayBeeR\YEDI\Reflection;
+    use JayBeeR\YEDI\ClassValidation;
+
+    use JayBeeR\YEDI\Failures\{
+        CannotFindClassName,
+        DependencyIdentifierNotFound,
+        InvalidTypeForDependencyIdentifier
+    };
+
+    use JayBeeR\YEDI\Resolution\{
+        AliasTo,
+        ClassDelegation
+    };
+
     use Psr\Container\ContainerInterface;
 
     /**
      * The alias container should be used for the mapping of classes to be overwritten.
      * That should be classes or interfaces.
-     *
      */
     class DependencyAliasContainer implements ContainerInterface
     {
+        use ClassValidation;
+
         /**
          * @var Map
          */
@@ -79,45 +92,9 @@ namespace JayBeeR\YEDI\Container {
          */
         public function delegate($fullyClassName): AliasTo
         {
-            Reflection::assertValidObjectName($fullyClassName);
+            $this->assertValidObjectName($fullyClassName);
 
-            return new class ($this->aliases, $fullyClassName) implements AliasTo {
-
-                protected Map $aliases;
-
-                protected string $fromClassName;
-
-                /**
-                 * @param Map $aliases
-                 * @param string $fromClassName
-                 */
-                public function __construct(Map $aliases, string $fromClassName)
-                {
-                    $this->aliases = $aliases;
-                    $this->fromClassName = $fromClassName;
-                }
-
-                /**
-                 * @param string $fullyClassName
-                 */
-                public function to(string $fullyClassName): void
-                {
-                    if (!class_exists($fullyClassName)) {
-                        throw new CannotFindClassName($fullyClassName);
-                    }
-
-                    $reflectedClass = Reflection::from($fullyClassName);
-
-                    if ($reflectedClass->isAbstract()) {
-                        throw new CannotInstantiateAbstractClass($reflectedClass);
-                    }
-
-                    // There is no need to check whether an abstract class, an interface or a trait has been used,
-                    // because this will be checked during instantiation.
-
-                    $this->aliases->put($this->fromClassName, $fullyClassName);
-                }
-            };
+            return new ClassDelegation($this->aliases, $fullyClassName);
         }
     }
 } 

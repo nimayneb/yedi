@@ -1,16 +1,27 @@
 <?php declare(strict_types=1);
 
+/*
+ * This file belongs to the package "nimayneb.yawl".
+ * See LICENSE.txt that was shipped with this package.
+ */
+
 namespace JayBeeR\YEDI {
 
-    use JayBeeR\YEDI\Failures\CannotFindClassName;
-    use JayBeeR\YEDI\Failures\CannotReflectClass;
-    use JayBeeR\YEDI\Failures\ClassNameIsIncorrectlyCapitalized;
-    use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
-    use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
-    use JayBeeR\YEDI\Failures\InvalidTypeForDependencyInjection;
-    use JayBeeR\YEDI\Failures\WrongArgumentsForDependencyResolution;
+    use JayBeeR\YEDI\Failures\{
+        CannotFindClassName,
+        CannotReflectClass,
+        ClassNameIsIncorrectlyCapitalized,
+        DependencyIdentifierNotFound,
+        InvalidTypeForDependencyIdentifier,
+        InvalidTypeForDependencyInjection,
+        WrongArgumentsForDependencyResolution
+    };
+
     use ReflectionException;
 
+    /**
+     *
+     */
     trait DependencyInjectorConstructor
     {
         protected ?DependencyInjector $di = null;

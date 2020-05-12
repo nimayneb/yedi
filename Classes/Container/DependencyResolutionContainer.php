@@ -1,16 +1,26 @@
 <?php declare(strict_types=1);
 
+/*
+ * This file belongs to the package "nimayneb.yawl".
+ * See LICENSE.txt that was shipped with this package.
+ */
+
 namespace JayBeeR\YEDI\Container {
 
     use Ds\Map;
-    use JayBeeR\YEDI\Arguments;
-    use JayBeeR\YEDI\ArgumentResolution;
-    use JayBeeR\YEDI\Failures\CannotFindClassName;
-    use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
-    use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
-    use JayBeeR\YEDI\Injector;
-    use JayBeeR\YEDI\Reflection;
-    use JayBeeR\YEDI\Singleton;
+    use JayBeeR\YEDI\ClassValidation;
+
+    use JayBeeR\YEDI\Failures\{
+        CannotFindClassName,
+        DependencyIdentifierNotFound,
+        InvalidTypeForDependencyIdentifier
+    };
+
+    use JayBeeR\YEDI\Resolution\{
+        ArgumentProvider,
+        Arguments
+    };
+
     use Psr\Container\ContainerInterface;
 
     /**
@@ -18,6 +28,8 @@ namespace JayBeeR\YEDI\Container {
      */
     class DependencyResolutionContainer implements ContainerInterface
     {
+        use ClassValidation;
+
         protected Map $resolvesDependencies;
 
         /**
@@ -74,139 +86,10 @@ namespace JayBeeR\YEDI\Container {
          */
         public function for(string $derivedClassName)
         {
-            Reflection::assertValidObjectName($derivedClassName);
+            $this->assertValidObjectName($derivedClassName);
 
             if (!$this->resolvesDependencies->hasKey($derivedClassName)) {
-                $this->resolvesDependencies->put(
-                    $derivedClassName,
-
-                    new class () implements Arguments {
-                        /**
-                         * @var array
-                         */
-                        protected array $arguments = [];
-
-                        /**
-                         * @param string $argumentName
-                         *
-                         * @return ArgumentResolution
-                         */
-                        public function setArgument(string $argumentName): ArgumentResolution
-                        {
-                            return new class($this->arguments, $argumentName, $this) implements ArgumentResolution {
-                                protected string $argumentName;
-
-                                protected array $arguments;
-
-                                protected Arguments $container;
-
-                                /**
-                                 * @param array $arguments
-                                 * @param string $argumentName
-                                 * @param Arguments $container
-                                 */
-                                public function __construct(array &$arguments, string $argumentName, Arguments $container)
-                                {
-                                    $this->arguments = &$arguments;
-                                    $this->argumentName = $argumentName;
-                                    $this->container = $container;
-                                }
-
-                                /**
-                                 * @param $fullyClassName
-                                 *
-                                 * @return Arguments
-                                 */
-                                public function asInjection(?string $fullyClassName): Arguments
-                                {
-                                    $this->arguments[$this->argumentName] = new class($fullyClassName) implements Injector {
-                                        /**
-                                         * @var string
-                                         */
-                                        protected ?string $className;
-
-                                        /**
-                                         * @param string $fullyClassName
-                                         */
-                                        public function __construct(?string $fullyClassName) {
-                                            $this->className = $fullyClassName;
-                                        }
-
-                                        /**
-                                         * @param string $derivedClassName
-                                         *
-                                         * @return string
-                                         */
-                                        public function getClassName(string $derivedClassName): ?string
-                                        {
-                                            return $this->className ?? $derivedClassName;
-                                        }
-                                    };
-
-                                    return $this->container;
-                                }
-
-                                /**
-                                 * @param mixed $value
-                                 *
-                                 * @return Arguments
-                                 */
-                                public function to($value): Arguments
-                                {
-                                    $this->arguments[$this->argumentName] = $value;
-
-                                    return $this->container;
-                                }
-
-                                /**
-                                 * @param string|null $fullyClassName
-                                 *
-                                 * @return Arguments
-                                 */
-                                public function asSingleton(?string $fullyClassName): Arguments
-                                {
-                                    if (!class_exists($fullyClassName)) {
-                                        throw new CannotFindClassName($fullyClassName);
-                                    }
-
-                                    $this->arguments[$this->argumentName] = new class($fullyClassName) implements Singleton {
-                                        /**
-                                         * @var string
-                                         */
-                                        protected ?string $className;
-
-                                        /**
-                                         * @param string $fullyClassName
-                                         */
-                                        public function __construct(?string $fullyClassName) {
-                                            $this->className = $fullyClassName;
-                                        }
-
-                                        /**
-                                         * @param string $derivedClassName
-                                         *
-                                         * @return string
-                                         */
-                                        public function getClassName(string $derivedClassName): ?string
-                                        {
-                                            return $this->className ?? $derivedClassName;
-                                        }
-                                    };
-
-                                    return $this->container;
-                                }
-                            };
-                        }
-
-                        /**
-                         * @return array
-                         */
-                        public function getArguments(): array
-                        {
-                            return $this->arguments;
-                        }
-                    }
-                );
+                $this->resolvesDependencies->put($derivedClassName, new ArgumentProvider);
             }
 
             return $this->resolvesDependencies->get($derivedClassName);

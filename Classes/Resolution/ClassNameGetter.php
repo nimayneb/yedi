@@ -1,7 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace JayBeeR\YEDI {
+/*
+ * This file belongs to the package "nimayneb.yawl".
+ * See LICENSE.txt that was shipped with this package.
+ */
 
+namespace JayBeeR\YEDI\Resolution {
+
+    /**
+     *
+     */
     interface ClassNameGetter
     {
         /**

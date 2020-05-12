@@ -1,5 +1,7 @@
 # YEDI - Yet enough dependency injectors
 
+[![Build Status](https://travis-ci.org/nimayneb/yedi.svg?branch=master)](https://travis-ci.org/nimayneb/yedi)
+
 This is a small and easy dependency injection (also called DI) framework.
 
 ##### Features:
@@ -22,7 +24,7 @@ First of all, this is not really cumbersome:
     $object = $di->get(My\Own\Class::class);
         
 
-Each class will be constructed internally using the pure DI method:
+Each classes will be constructed internally using the pure DI method:
 
     class MyOwnClass
     {
@@ -38,8 +40,8 @@ Each class will be constructed internally using the pure DI method:
     $myClass = $di->get(MyOwnClass::class);
 
 
-The given class type in the constructor argument `$stuff` will be fetched automatically and make a DI delegation before 
-instantiating the requested class.
+The given class type in the constructor argument `$stuff` will be reflected automatically and make a DI delegation
+before instantiating the requested class.
 
 You can use this class in any form without a DI:
 
@@ -97,7 +99,7 @@ However, you have more support with YEDI. Continue reading.
 
 The resolution container should be used for the instantiating of a dependency class with concrete constructor arguments. 
 
-    class MyClass {
+    class ForeignClass {
         public function __construct(
             string $name, 
             Foreign\HelperInterface $helper, 
@@ -147,12 +149,12 @@ That is the solution:
     $di = new JayBeeR\YEDI\DependencyInjector;
     $di->for(MyClassA::class)
         ->setArgument(ForeignInterface::class)
-        ->with(MyClassInterfaceA::class)
+        ->asInjection(MyClassInterfaceA::class)
     ;
 
     $di->for(MyClassB::class)
         ->setArgument(ForeignInterface::class)
-        ->with(MyClassInterfaceB::class)
+        ->asInjection(MyClassInterfaceB::class)
     ;
     
     
@@ -167,10 +169,10 @@ You can now instantiate with the simple class name:
     $myClassB = $di->get(MyClassB::class); 
     
 
-#### Use of Singleton class
+#### Use of Singleton classes
 
 Sometimes you want to ensure that certain classes cannot be instantiated multiple times. This is what the Singleton 
-design pattern stands for. It is also called an anti-pattern, because of many disadvantages.
+design pattern stands for. It is also called an anti-pattern, because of several disadvantages.
 
 You can use a singleton instance without this pattern:
 

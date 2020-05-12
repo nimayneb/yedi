@@ -1,17 +1,36 @@
 <?php declare(strict_types=1);
 
+/*
+ * This file belongs to the package "nimayneb.yawl".
+ * See LICENSE.txt that was shipped with this package.
+ */
+
 namespace JayBeeR\YEDI {
 
-    use JayBeeR\YEDI\Container\DependencyAliasContainer;
-    use JayBeeR\YEDI\Container\DependencyResolutionContainer;
-    use JayBeeR\YEDI\Failures\CannotFindClassName;
-    use JayBeeR\YEDI\Failures\CannotReflectClass;
-    use JayBeeR\YEDI\Failures\ClassNameIsIncorrectlyCapitalized;
-    use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
-    use JayBeeR\YEDI\Failures\InvalidTypeForDependencyIdentifier;
-    use JayBeeR\YEDI\Failures\InvalidTypeForDependencyInjection;
-    use JayBeeR\YEDI\Failures\MissingTypeForArgument;
-    use JayBeeR\YEDI\Failures\WrongArgumentsForDependencyResolution;
+    use JayBeeR\YEDI\Container\{
+        DependencyAliasContainer,
+        DependencyResolutionContainer
+    };
+
+    use JayBeeR\YEDI\Failures\{
+        CannotFindClassName,
+        CannotReflectClass,
+        ClassNameIsIncorrectlyCapitalized,
+        DependencyIdentifierNotFound,
+        InvalidTypeForDependencyIdentifier,
+        InvalidTypeForDependencyInjection,
+        MissingTypeForArgument,
+        WrongArgumentsForDependencyResolution
+    };
+
+    use JayBeeR\YEDI\Resolution\{
+        AliasTo,
+        Arguments,
+        ClassNameGetter,
+        Injector,
+        Singleton
+    };
+
     use ReflectionClass;
     use ReflectionException;
     use ReflectionNamedType;
@@ -19,14 +38,17 @@ namespace JayBeeR\YEDI {
 
     /**
      *
+     * @SuppressWarnings(PHPMD.StaticAccess) Reason: because of Factory calls
      */
     class DependencyInjector
     {
+        use ClassValidation;
+
         protected DependencyResolutionContainer $resolutionContainer;
 
         protected DependencyAliasContainer $aliasesContainer;
 
-        protected Arguments $currentClassNameContainer;
+        protected Arguments $currentArguments;
 
         /**
          * @param DependencyAliasContainer $aliasesContainer
@@ -106,8 +128,8 @@ namespace JayBeeR\YEDI {
          */
         protected function resolveConstructor(ReflectionClass $reflectedClass, string $derivedClassName)
         {
-            $this->currentClassNameContainer = $this->resolutionContainer->for($derivedClassName);
-            $availableArgumentsFromResolution = $this->resolutionContainer->get($derivedClassName)->getArguments();
+            $this->currentArguments = $this->resolutionContainer->for($derivedClassName);
+            $availableArguments = $this->resolutionContainer->get($derivedClassName)->getArguments();
             $arguments = [];
 
             // TODO: ... variadic - check of single type
@@ -115,17 +137,17 @@ namespace JayBeeR\YEDI {
             foreach ($reflectedClass->getConstructor()->getParameters() as $reflectedParameter) {
                 if (false === $this->resolveArgument(
                     $reflectedParameter,
-                    $availableArgumentsFromResolution,
+                    $availableArguments,
                     $arguments
                 )) {
                     break;
                 }
             }
 
-            if (count($availableArgumentsFromResolution)) {
+            if (count($availableArguments)) {
                 throw new WrongArgumentsForDependencyResolution(
                     $reflectedClass,
-                    $availableArgumentsFromResolution,
+                    $availableArguments,
                     $arguments
                 );
             }
@@ -135,7 +157,7 @@ namespace JayBeeR\YEDI {
 
         /**
          * @param ReflectionParameter $reflectedParameter
-         * @param array $availableArgumentsFromResolution
+         * @param array $availableArguments
          * @param array $arguments
          *
          * @return bool
@@ -151,12 +173,12 @@ namespace JayBeeR\YEDI {
          */
         protected function resolveArgument(
             ReflectionParameter $reflectedParameter,
-            array &$availableArgumentsFromResolution,
+            array &$availableArguments,
             array &$arguments
         ): bool
         {
             $argumentName = $reflectedParameter->getName();
-            $argumentExists = array_key_exists($argumentName, $availableArgumentsFromResolution);
+            $argumentExists = array_key_exists($argumentName, $availableArguments);
 
             if (
                 (
@@ -182,10 +204,10 @@ namespace JayBeeR\YEDI {
             } else {
                 $arguments[] = $this->resolveArgumentWithResolution(
                     $reflectedParameter,
-                    $availableArgumentsFromResolution[$argumentName]
+                    $availableArguments[$argumentName]
                 );
 
-                unset($availableArgumentsFromResolution[$argumentName]);
+                unset($availableArguments[$argumentName]);
             }
 
             return true;
@@ -210,7 +232,7 @@ namespace JayBeeR\YEDI {
             $argumentName = $reflectedParameter->getName();
             $reflectedType = Reflection::getNamedType($reflectedParameter);
             $fullyClassName = $reflectedType->getName();
-            $this->currentClassNameContainer->setArgument($argumentName)->asInjection($fullyClassName);
+            $this->currentArguments->setArgument($argumentName)->asInjection($fullyClassName);
 
             if ($reflectedParameter->isDefaultValueAvailable()) {
                 $argument = $reflectedParameter->getDefaultValue();
@@ -244,7 +266,7 @@ namespace JayBeeR\YEDI {
                 $argument = $this->resolveArgumentValue($reflectedParameter, $argumentResolution);
             } elseif ($argumentResolution instanceof Singleton) {
                 $argument = $this->resolveArgumentValue($reflectedParameter, $argumentResolution);
-                $this->currentClassNameContainer->setArgument($argumentName)->to($argument);
+                $this->currentArguments->setArgument($argumentName)->to($argument);
             } else {
                 $argument = $argumentResolution;
             }
@@ -291,7 +313,7 @@ namespace JayBeeR\YEDI {
          */
         public function get(string $fullyClassName): object
         {
-            Reflection::assertValidObjectName($fullyClassName);
+            $this->assertValidObjectName($fullyClassName);
 
             if ($this->aliasesContainer->has($fullyClassName)) {
                 $fullyClassName = $this->aliasesContainer->get($fullyClassName);

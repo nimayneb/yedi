@@ -1,8 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace JayBeeR\YEDI {
+/*
+ * This file belongs to the package "nimayneb.yawl".
+ * See LICENSE.txt that was shipped with this package.
+ */
 
-    interface ArgumentResolution
+namespace JayBeeR\YEDI\Resolution {
+
+    /**
+     *
+     */
+    interface ArgumentType
     {
         /**
          * @param $fullyClassName

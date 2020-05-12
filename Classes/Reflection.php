@@ -1,17 +1,27 @@
 <?php declare(strict_types=1);
 
+/*
+ * This file belongs to the package "nimayneb.yawl".
+ * See LICENSE.txt that was shipped with this package.
+ */
+
 namespace JayBeeR\YEDI {
 
-    use JayBeeR\YEDI\Failures\CannotFindClassName;
-    use JayBeeR\YEDI\Failures\CannotReflectClass;
-    use JayBeeR\YEDI\Failures\ClassNameIsIncorrectlyCapitalized;
-    use JayBeeR\YEDI\Failures\MissingTypeForArgument;
+    use JayBeeR\YEDI\Failures\{
+        CannotReflectClass,
+        ClassNameIsIncorrectlyCapitalized,
+        MissingTypeForArgument
+    };
+
     use ReflectionClass;
     use ReflectionException;
     use ReflectionNamedType;
     use ReflectionParameter;
     use ReflectionType;
 
+    /**
+     *
+     */
     class Reflection
     {
         /**
@@ -34,22 +44,6 @@ namespace JayBeeR\YEDI {
             }
 
             return $reflectedClass;
-        }
-
-        /**
-         * @param string $fullyClassName
-         *
-         * @throws CannotFindClassName
-         */
-        public static function assertValidObjectName(string $fullyClassName): void
-        {
-            if (
-                (!class_exists($fullyClassName))
-                && (!interface_exists($fullyClassName))
-                && (!trait_exists($fullyClassName))
-            ) {
-                throw new CannotFindClassName($fullyClassName);
-            }
         }
 
         /**
