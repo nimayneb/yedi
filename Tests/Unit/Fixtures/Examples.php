@@ -123,4 +123,76 @@ namespace JayBeeR\Tests\Unit\Fixtures {
     {
 
     }
+
+    class MyClassWithMissingType
+    {
+        public function __construct($myClassA)
+        {
+
+        }
+    }
+
+    class MyClassWithIntegerType
+    {
+        public function __construct(int $myClassA)
+        {
+
+        }
+    }
+
+    class MyClassWithFloatType
+    {
+        public function __construct(float $myClassA)
+        {
+
+        }
+    }
+
+    class MyClassWithStringType
+    {
+        public function __construct(string $myClassA)
+        {
+
+        }
+    }
+
+    class MyClassWithObjectType
+    {
+        public function __construct(object $myClassA)
+        {
+
+        }
+    }
+
+    class MyClassWithBooleanType
+    {
+        public function __construct(bool $myClassA)
+        {
+
+        }
+    }
+
+    class MyClassWithArrayType
+    {
+        public function __construct(array $myClassA)
+        {
+
+        }
+    }
+
+    class MyClassWithMissingTypeOfDependency
+    {
+        public function __construct(MyClassWithMissingType $myClassI)
+        {
+
+        }
+    }
+
+    abstract class MyAbstractA {
+
+    }
+
+    trait MyTraitA {
+
+    }
 }

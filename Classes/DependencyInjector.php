@@ -7,37 +7,23 @@
 
 namespace JayBeeR\YEDI {
 
-    use JayBeeR\YEDI\Container\{
-        DependencyAliasContainer,
-        DependencyResolutionContainer
-    };
-
-    use JayBeeR\YEDI\Failures\{
-        CannotFindClassName,
+    use JayBeeR\YEDI\Container\{DependencyAliasContainer, DependencyResolutionContainer};
+    use JayBeeR\YEDI\Failures\{CannotFindClassName,
+        CannotInstantiateClass,
         CannotReflectClass,
         ClassNameIsIncorrectlyCapitalized,
         DependencyIdentifierNotFound,
         InvalidTypeForDependencyIdentifier,
         InvalidTypeForDependencyInjection,
         MissingTypeForArgument,
-        WrongArgumentsForDependencyResolution
-    };
-
-    use JayBeeR\YEDI\Resolution\{
-        AliasTo,
-        Arguments,
-        ClassNameGetter,
-        Injector,
-        Singleton
-    };
-
+        WrongArgumentsForDependencyResolution};
+    use JayBeeR\YEDI\Resolution\{AliasTo, Arguments, ClassNameGetter, Injector, Singleton};
     use ReflectionClass;
     use ReflectionException;
     use ReflectionNamedType;
     use ReflectionParameter;
 
     /**
-     *
      * @SuppressWarnings(PHPMD.StaticAccess) Reason: because of Factory calls
      */
     class DependencyInjector
@@ -69,6 +55,7 @@ namespace JayBeeR\YEDI {
          *
          * @return mixed
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
@@ -95,14 +82,15 @@ namespace JayBeeR\YEDI {
          *
          * @return object
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
          * @throws MissingTypeForArgument
-         * @throws WrongArgumentsForDependencyResolution
          * @throws ReflectionException (cannot occur)
+         * @throws WrongArgumentsForDependencyResolution
          */
         protected function resolveClass(ReflectionClass $reflectedClass, string $derivedClassName): object
         {
@@ -117,14 +105,15 @@ namespace JayBeeR\YEDI {
          *
          * @return array
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
          * @throws MissingTypeForArgument
-         * @throws WrongArgumentsForDependencyResolution
          * @throws ReflectionException (cannot occur)
+         * @throws WrongArgumentsForDependencyResolution
          */
         protected function resolveConstructor(ReflectionClass $reflectedClass, string $derivedClassName)
         {
@@ -136,10 +125,11 @@ namespace JayBeeR\YEDI {
 
             foreach ($reflectedClass->getConstructor()->getParameters() as $reflectedParameter) {
                 if (false === $this->resolveArgument(
-                    $reflectedParameter,
-                    $availableArguments,
-                    $arguments
-                )) {
+                        $reflectedParameter,
+                        $availableArguments,
+                        $arguments
+                    )) {
+
                     break;
                 }
             }
@@ -170,6 +160,7 @@ namespace JayBeeR\YEDI {
          * @throws WrongArgumentsForDependencyResolution
          * @throws MissingTypeForArgument
          * @throws ReflectionException (cannot occur)
+         * @throws CannotInstantiateClass
          */
         protected function resolveArgument(
             ReflectionParameter $reflectedParameter,
@@ -180,21 +171,30 @@ namespace JayBeeR\YEDI {
             $argumentName = $reflectedParameter->getName();
             $argumentExists = array_key_exists($argumentName, $availableArguments);
 
-            if (
+            if ((null === $reflectedParameter->getType()) && (false === $argumentExists)) {
+                if (!$reflectedParameter->isOptional()) {
+                    // wo/ argument, this is not possible:
+                    // - public function __construct($variable);
+                    throw new MissingTypeForArgument($reflectedParameter);
+                }
+
+                return false;
+            } elseif (
                 (
-                    (null === $reflectedParameter->getType())
-                    || ($reflectedParameter->isOptional())
-                    || ($reflectedParameter->getType()->isBuiltin())
+                    (null !== $reflectedParameter->getType())
+                    && ($reflectedParameter->getType()->isBuiltin())
                 ) && (false === $argumentExists)
             ) {
-                // wo/ argument, this is not possible:
-                // - public function __construct($variable);
-                // - public function __construct(bool $variable);
-                // - public function __construct(int $variable);
-                // - public function __construct(float $variable);
-                // - public function __construct(string $variable);
-                // - public function __construct(object $variable);
-                // - public function __construct(array $variable);
+                if (!$reflectedParameter->isOptional()) {
+                    // wo/ argument, this is not possible:
+                    // - public function __construct(bool $variable);
+                    // - public function __construct(int $variable);
+                    // - public function __construct(float $variable);
+                    // - public function __construct(string $variable);
+                    // - public function __construct(object $variable);
+                    // - public function __construct(array $variable);
+                    throw new InvalidTypeForDependencyInjection($reflectedParameter);
+                }
 
                 return false;
             }
@@ -218,6 +218,7 @@ namespace JayBeeR\YEDI {
          *
          * @return mixed
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
@@ -249,6 +250,7 @@ namespace JayBeeR\YEDI {
          *
          * @return mixed
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
@@ -288,6 +290,7 @@ namespace JayBeeR\YEDI {
          * @throws MissingTypeForArgument
          * @throws ReflectionException (cannot occur)
          * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotInstantiateClass
          */
         protected function resolveArgumentValue(ReflectionParameter $reflectedParameter, ClassNameGetter $resolution)
         {
@@ -310,6 +313,7 @@ namespace JayBeeR\YEDI {
          * @throws MissingTypeForArgument
          * @throws ReflectionException (cannot occur)
          * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotInstantiateClass
          */
         public function get(string $fullyClassName): object
         {
@@ -320,6 +324,10 @@ namespace JayBeeR\YEDI {
             }
 
             $reflectedClass = Reflection::from($fullyClassName);
+
+            if (!$reflectedClass->isInstantiable()) {
+                throw new CannotInstantiateClass($reflectedClass);
+            }
 
             if (
                 (null === $reflectedClass->getConstructor())

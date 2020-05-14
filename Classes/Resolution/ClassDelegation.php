@@ -11,7 +11,7 @@ namespace JayBeeR\YEDI\Resolution {
 
     use JayBeeR\YEDI\Failures\{
         CannotFindClassName,
-        CannotInstantiateAbstractClass,
+        CannotInstantiateClass,
         CannotReflectClass,
         ClassNameIsIncorrectlyCapitalized
     };
@@ -42,7 +42,7 @@ namespace JayBeeR\YEDI\Resolution {
          * @param string $fullyClassName
          *
          * @throws CannotFindClassName
-         * @throws CannotInstantiateAbstractClass
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          */
@@ -54,8 +54,8 @@ namespace JayBeeR\YEDI\Resolution {
 
             $reflectedClass = Reflection::from($fullyClassName);
 
-            if ($reflectedClass->isAbstract()) {
-                throw new CannotInstantiateAbstractClass($reflectedClass);
+            if (!$reflectedClass->isInstantiable()) {
+                throw new CannotInstantiateClass($reflectedClass);
             }
 
             // There is no need to check whether an abstract class, an interface or a trait has been used,

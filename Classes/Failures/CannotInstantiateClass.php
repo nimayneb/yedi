@@ -13,7 +13,7 @@ namespace JayBeeR\YEDI\Failures {
     /**
      *
      */
-    class CannotInstantiateAbstractClass extends Exception
+    class CannotInstantiateClass extends Exception
     {
         /**
          * @param ReflectionClass $reflectedClass
@@ -21,7 +21,7 @@ namespace JayBeeR\YEDI\Failures {
         public function __construct(ReflectionClass $reflectedClass)
         {
             parent::__construct(
-                sprintf('Cannot instantiate an abstract class named <%s>', $reflectedClass->getName())
+                sprintf('Cannot instantiate class named <%s>', $reflectedClass->getName())
             );
         }
 

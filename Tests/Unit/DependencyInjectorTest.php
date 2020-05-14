@@ -16,10 +16,23 @@ namespace JayBeeR\Tests {
     use JayBeeR\Tests\Unit\Fixtures\MyClassF;
     use JayBeeR\Tests\Unit\Fixtures\MyClassG;
     use JayBeeR\Tests\Unit\Fixtures\MyClassH;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassWithArrayType;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassWithBooleanType;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassWithFloatType;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassWithIntegerType;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassWithMissingType;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassWithMissingTypeOfDependency;
+    use JayBeeR\Tests\Unit\Fixtures\MyAbstractA;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassWithObjectType;
+    use JayBeeR\Tests\Unit\Fixtures\MyClassWithStringType;
+    use JayBeeR\Tests\Unit\Fixtures\MyInterfaceA;
     use JayBeeR\Tests\Unit\Fixtures\MyInterfacedClassA;
     use JayBeeR\Tests\Unit\Fixtures\MyInterfacedClassB;
+    use JayBeeR\Tests\Unit\Fixtures\MyTraitA;
+    use JayBeeR\YEDI\Defaults;
     use JayBeeR\YEDI\DependencyInjector;
     use JayBeeR\YEDI\Failures\CannotFindClassName;
+    use JayBeeR\YEDI\Failures\CannotInstantiateClass;
     use JayBeeR\YEDI\Failures\CannotReflectClass;
     use JayBeeR\YEDI\Failures\ClassNameIsIncorrectlyCapitalized;
     use JayBeeR\YEDI\Failures\DependencyIdentifierNotFound;
@@ -42,11 +55,11 @@ namespace JayBeeR\Tests {
         public function getDependenciesProvider(): array
         {
             return [
-                [ MyClassA::class ],
-                [ MyClassB::class ],
-                [ MyClassC::class ],
-                [ MyClassA_YEDI::class ],
-                [ MyClassB_YEDI::class ]
+                [MyClassA::class],
+                [MyClassB::class],
+                [MyClassC::class],
+                [MyClassA_YEDI::class],
+                [MyClassB_YEDI::class],
             ];
         }
 
@@ -65,6 +78,7 @@ namespace JayBeeR\Tests {
          * @throws MissingTypeForArgument
          * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotInstantiateClass
          */
         public function get_returnsDependency(string $className): void
         {
@@ -76,8 +90,8 @@ namespace JayBeeR\Tests {
         public function getDependenciesForAliasProvider(): array
         {
             return [
-                [ MyClassB::class ],
-                [ MyClassA_YEDI::class ]
+                [MyClassB::class],
+                [MyClassA_YEDI::class],
             ];
         }
 
@@ -96,6 +110,7 @@ namespace JayBeeR\Tests {
          * @throws MissingTypeForArgument
          * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotInstantiateClass
          */
         public function get_ifAliasIsSet_returnsDependency(string $className)
         {
@@ -109,7 +124,6 @@ namespace JayBeeR\Tests {
 
         /**
          * @test
-         *
          * @throws CannotFindClassName
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
@@ -119,16 +133,15 @@ namespace JayBeeR\Tests {
          * @throws MissingTypeForArgument
          * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotInstantiateClass
          */
         public function get_ifTwoResolutionsIsSet_returnsDependency()
         {
             $this->di->for(MyClassE::class)
-                ->setArgument('myInterfaceA')->asInjection(MyInterfacedClassA::class)
-            ;
+                ->setArgument('myInterfaceA')->asInjection(MyInterfacedClassA::class);
 
             $this->di->for(MyClassF::class)
-                ->setArgument('myInterfaceA')->asInjection(MyInterfacedClassB::class)
-            ;
+                ->setArgument('myInterfaceA')->asInjection(MyInterfacedClassB::class);
 
             $object = $this->di->get(MyClassE::class);
 
@@ -143,7 +156,6 @@ namespace JayBeeR\Tests {
 
         /**
          * @test
-         *
          * @throws CannotFindClassName
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
@@ -153,19 +165,127 @@ namespace JayBeeR\Tests {
          * @throws MissingTypeForArgument
          * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
+         * @throws CannotInstantiateClass
          */
         public function get_ifResolutionIsSet_returnsDependency()
         {
             $this->di->for(MyClassG::class)
                 ->setArgument('myInterfaceA')->asInjection(MyInterfacedClassA::class)
-                ->setArgument('myInterfaceB')->asInjection(MyInterfacedClassB::class)
-            ;
+                ->setArgument('myInterfaceB')->asInjection(MyInterfacedClassB::class);
 
             $object = $this->di->get(MyClassG::class);
 
             $this->assertInstanceOf(MyClassG::class, $object);
             $this->assertInstanceOf(MyInterfacedClassA::class, $object->myInterfaceA);
             $this->assertInstanceOf(MyInterfacedClassB::class, $object->myInterfaceB);
+        }
+
+        /**
+         * @return array
+         */
+        public function getClassesWithInvalidTypeProvider()
+        {
+            return [
+                [MyClassWithMissingType::class, MissingTypeForArgument::class],
+                [MyClassWithMissingTypeOfDependency::class, MissingTypeForArgument::class],
+
+                [MyClassWithIntegerType::class, InvalidTypeForDependencyInjection::class],
+                [MyClassWithFloatType::class, InvalidTypeForDependencyInjection::class],
+                [MyClassWithStringType::class, InvalidTypeForDependencyInjection::class],
+                [MyClassWithObjectType::class, InvalidTypeForDependencyInjection::class],
+                [MyClassWithBooleanType::class, InvalidTypeForDependencyInjection::class],
+                [MyClassWithArrayType::class, InvalidTypeForDependencyInjection::class],
+
+                [MyAbstractA::class, CannotInstantiateClass::class],
+                [MyInterfaceA::class, CannotInstantiateClass::class],
+                [MyTraitA::class, CannotInstantiateClass::class],
+                ['UnknownClass', CannotFindClassName::class],
+            ];
+        }
+
+        /**
+         * @dataProvider getClassesWithInvalidTypeProvider
+         * @test
+         *
+         * @param string $className
+         * @param string $exceptionClassName
+         *
+         * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         * @throws InvalidTypeForDependencyInjection
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException
+         * @throws WrongArgumentsForDependencyResolution
+         */
+        public function get_withoutInvalidType_throwsException(string $className, string $exceptionClassName)
+        {
+            $this->expectException($exceptionClassName);
+            $this->di->get($className);
+        }
+
+        /**
+         * @return array
+         */
+        public function getClassesWithWrongCaseSensitivesProvider()
+        {
+            return [
+                [strtolower(MyClassA::class), ClassNameIsIncorrectlyCapitalized::class],
+                [strtoupper(MyClassA::class), ClassNameIsIncorrectlyCapitalized::class],
+            ];
+        }
+
+        /**
+         * @dataProvider getClassesWithWrongCaseSensitivesProvider
+         * @test
+         *
+         * @param string $className
+         * @param string $exceptionClassName
+         *
+         * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         * @throws InvalidTypeForDependencyInjection
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException
+         * @throws WrongArgumentsForDependencyResolution
+         */
+        public function get_withWrongCaseSensitiveClassNames_throwsException(string $className, string $exceptionClassName)
+        {
+            $this->expectException($exceptionClassName);
+
+            Defaults::$classNamesAreCaseSensitive = true;
+            $this->di->get($className);
+        }
+
+        /**
+         * @dataProvider getClassesWithWrongCaseSensitivesProvider
+         * @test
+         *
+         * @param string $className
+         *
+         * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         * @throws InvalidTypeForDependencyInjection
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException
+         * @throws WrongArgumentsForDependencyResolution
+         */
+        public function get_withWrongCaseSensitiveClassNames_ButValid_returnsDependency(string $className)
+        {
+            Defaults::$classNamesAreCaseSensitive = false;
+            $object = $this->di->get($className);
+            $this->assertInstanceOf($className, $object);
         }
 
         // public function __construct($variable);
@@ -177,6 +297,7 @@ namespace JayBeeR\Tests {
         protected function tearDown(): void
         {
             unset($this->di);
+            Defaults::$classNamesAreCaseSensitive = false;
         }
     }
 }
