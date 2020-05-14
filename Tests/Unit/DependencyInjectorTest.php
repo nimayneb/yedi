@@ -5,7 +5,7 @@
  * See LICENSE.txt that was shipped with this package.
  */
 
-namespace JayBeeR\Tests {
+namespace JayBeeR\Tests\Unit {
 
     use JayBeeR\Tests\Unit\Fixtures\MyClassA;
     use JayBeeR\Tests\Unit\Fixtures\MyClassA_YEDI;
@@ -199,6 +199,7 @@ namespace JayBeeR\Tests {
                 [MyAbstractA::class, CannotInstantiateClass::class],
                 [MyInterfaceA::class, CannotInstantiateClass::class],
                 [MyTraitA::class, CannotInstantiateClass::class],
+
                 ['UnknownClass', CannotFindClassName::class],
             ];
         }
