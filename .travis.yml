@@ -11,3 +11,4 @@ install:
 script:
   - composer tests
   - composer phpmd
+  - cat report.txt

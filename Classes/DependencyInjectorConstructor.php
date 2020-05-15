@@ -7,15 +7,15 @@
 
 namespace JayBeeR\YEDI {
 
-    use JayBeeR\YEDI\Failures\{
-        CannotFindClassName,
+    use JayBeeR\YEDI\Failures\{CannotFindClassName,
+        CannotInstantiateClass,
         CannotReflectClass,
         ClassNameIsIncorrectlyCapitalized,
         DependencyIdentifierNotFound,
         InvalidTypeForDependencyIdentifier,
         InvalidTypeForDependencyInjection,
-        WrongArgumentsForDependencyResolution
-    };
+        MissingTypeForArgument,
+        WrongArgumentsForDependencyResolution};
 
     use ReflectionException;
 
@@ -34,11 +34,12 @@ namespace JayBeeR\YEDI {
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
-         * @throws Failures\MissingTypeForArgument
+         * @throws CannotInstantiateClass
+         * @throws MissingTypeForArgument
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
-         * @throws WrongArgumentsForDependencyResolution
          * @throws ReflectionException (cannot occur)
+         * @throws WrongArgumentsForDependencyResolution
          */
         protected function get(string $fullyClassName): object
         {

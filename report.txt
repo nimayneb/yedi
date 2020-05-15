@@ -1,0 +1,42 @@
+
+
+Code Coverage Report:      
+  2020-05-15 18:40:08      
+                           
+ Summary:                  
+  Classes: 30.00% (6/20)   
+  Methods: 50.00% (27/54)  
+  Lines:   60.17% (139/231)
+
+\JayBeeR\YEDI::ClassValidation
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  5/  5)
+\JayBeeR\YEDI::DependencyInjectorConstructor
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  4/  4)
+\JayBeeR\YEDI::JayBeeR\YEDI\DependencyInjector
+  Methods: 100.00% ( 5/ 5)   Lines: 100.00% ( 23/ 23)
+\JayBeeR\YEDI::JayBeeR\YEDI\DependencyResolver
+  Methods:  28.57% ( 2/ 7)   Lines:  80.36% ( 45/ 56)
+\JayBeeR\YEDI::JayBeeR\YEDI\Reflection
+  Methods:   0.00% ( 0/ 2)   Lines:  66.67% (  6/  9)
+\JayBeeR\YEDI\Container::JayBeeR\YEDI\Container\DependencyAliasContainer
+  Methods:  50.00% ( 2/ 4)   Lines:  80.00% (  8/ 10)
+\JayBeeR\YEDI\Container::JayBeeR\YEDI\Container\DependencyResolutionContainer
+  Methods:  50.00% ( 2/ 4)   Lines:  50.00% (  6/ 12)
+\JayBeeR\YEDI\Failures::JayBeeR\YEDI\Failures\CannotFindClassName
+  Methods:  50.00% ( 1/ 2)   Lines:  75.00% (  3/  4)
+\JayBeeR\YEDI\Failures::JayBeeR\YEDI\Failures\CannotInstantiateClass
+  Methods:  50.00% ( 1/ 2)   Lines:  75.00% (  3/  4)
+\JayBeeR\YEDI\Failures::JayBeeR\YEDI\Failures\ClassNameIsIncorrectlyCapitalized
+  Methods:  50.00% ( 1/ 2)   Lines:  75.00% (  3/  4)
+\JayBeeR\YEDI\Failures::JayBeeR\YEDI\Failures\InvalidTypeForDependencyInjection
+  Methods:  50.00% ( 1/ 2)   Lines:  85.71% (  6/  7)
+\JayBeeR\YEDI\Failures::JayBeeR\YEDI\Failures\MissingTypeForArgument
+  Methods:  50.00% ( 1/ 2)   Lines:  85.71% (  6/  7)
+\JayBeeR\YEDI\Resolution::JayBeeR\YEDI\Resolution\Argument
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  3/  3)
+\JayBeeR\YEDI\Resolution::JayBeeR\YEDI\Resolution\ArgumentAllocator
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  2/  2)
+\JayBeeR\YEDI\Resolution::JayBeeR\YEDI\Resolution\ArgumentDelegation
+  Methods:  50.00% ( 2/ 4)   Lines:  50.00% (  6/ 12)
+\JayBeeR\YEDI\Resolution::JayBeeR\YEDI\Resolution\ClassDelegation
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% ( 10/ 10)

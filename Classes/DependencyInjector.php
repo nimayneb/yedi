@@ -7,6 +7,8 @@
 
 namespace JayBeeR\YEDI {
 
+    use JayBeeR\YEDI\Container\DependencyAliasContainer;
+    use JayBeeR\YEDI\Container\DependencyResolutionContainer;
     use JayBeeR\YEDI\Failures\{CannotFindClassName,
         CannotInstantiateClass,
         CannotReflectClass,
@@ -15,44 +17,34 @@ namespace JayBeeR\YEDI {
         InvalidTypeForDependencyIdentifier,
         InvalidTypeForDependencyInjection,
         MissingTypeForArgument,
-        WrongArgumentsForDependencyResolution};
-    use JayBeeR\YEDI\Resolution\{ClassNameGetter, Injector, Singleton};
+        WrongArgumentsForDependencyResolution
+    };
+    use JayBeeR\YEDI\Resolution\{AliasTo, Arguments};
     use ReflectionClass;
     use ReflectionException;
-    use ReflectionNamedType;
-    use ReflectionParameter;
 
     /**
      * @SuppressWarnings(PHPMD.StaticAccess) Reason: because of Factory calls
      */
-    class DependencyInjector extends DependencyResolver
+    class DependencyInjector
     {
+        use ClassValidation;
+
+        protected DependencyResolutionContainer $resolutionContainer;
+
+        protected DependencyAliasContainer $aliasesContainer;
 
         /**
-         * @param ReflectionParameter $reflectedParameter
-         * @param ReflectionNamedType $reflectedType
-         *
-         * @return mixed
-         * @throws CannotFindClassName
-         * @throws CannotInstantiateClass
-         * @throws CannotReflectClass
-         * @throws ClassNameIsIncorrectlyCapitalized
-         * @throws DependencyIdentifierNotFound
-         * @throws InvalidTypeForDependencyIdentifier
-         * @throws InvalidTypeForDependencyInjection
-         * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
-         * @throws WrongArgumentsForDependencyResolution
+         * @param DependencyAliasContainer $aliasesContainer
+         * @param DependencyResolutionContainer $resolverContainer
          */
-        protected function resolveType(ReflectionParameter $reflectedParameter, ReflectionNamedType $reflectedType)
+        public function __construct(
+            DependencyAliasContainer $aliasesContainer = null,
+            DependencyResolutionContainer $resolverContainer = null
+        )
         {
-            $fullyClassName = $reflectedType->getName();
-
-            if ($reflectedType->isBuiltin()) {
-                throw new InvalidTypeForDependencyInjection($reflectedParameter);
-            }
-
-            return $this->get($fullyClassName);
+            $this->aliasesContainer = $aliasesContainer ?? new DependencyAliasContainer;
+            $this->resolutionContainer = $resolverContainer ?? new DependencyResolutionContainer;
         }
 
         /**
@@ -73,18 +65,22 @@ namespace JayBeeR\YEDI {
          */
         protected function resolveClass(ReflectionClass $reflectedClass, string $derivedClassName): object
         {
-            $arguments = $this->resolveConstructor($reflectedClass, $derivedClassName);
+            $resolver = new DependencyResolver(
+                $reflectedClass,
+                $this->for($derivedClassName),
+                $this
+            );
+
+            $arguments = $resolver->resolveConstructor();
 
             return $reflectedClass->newInstance(...$arguments);
         }
 
         /**
-         * @param ReflectionClass $reflectedClass
-         * @param string $derivedClassName
+         * @param string $fullyClassName
          *
-         * @return array
+         * @return mixed
          * @throws CannotFindClassName
-         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
@@ -93,190 +89,56 @@ namespace JayBeeR\YEDI {
          * @throws MissingTypeForArgument
          * @throws ReflectionException (cannot occur)
          * @throws WrongArgumentsForDependencyResolution
-         */
-        protected function resolveConstructor(ReflectionClass $reflectedClass, string $derivedClassName)
-        {
-            $this->currentArguments = $this->resolutionContainer->for($derivedClassName);
-            $availableArguments = $this->resolutionContainer->get($derivedClassName)->getArguments();
-            $arguments = [];
-
-            // TODO: ... variadic - check of single type
-
-            foreach ($reflectedClass->getConstructor()->getParameters() as $reflectedParameter) {
-                if (false === $this->resolveArgument(
-                        $reflectedParameter,
-                        $availableArguments,
-                        $arguments
-                    )) {
-
-                    break;
-                }
-            }
-
-            if (count($availableArguments)) {
-                throw new WrongArgumentsForDependencyResolution(
-                    $reflectedClass,
-                    $availableArguments,
-                    $arguments
-                );
-            }
-
-            return $arguments;
-        }
-
-        /**
-         * @param ReflectionParameter $reflectedParameter
-         * @param array $availableArguments
-         * @param array $arguments
-         *
-         * @return bool
-         * @throws CannotFindClassName
-         * @throws CannotReflectClass
-         * @throws ClassNameIsIncorrectlyCapitalized
-         * @throws DependencyIdentifierNotFound
-         * @throws InvalidTypeForDependencyIdentifier
-         * @throws InvalidTypeForDependencyInjection
-         * @throws WrongArgumentsForDependencyResolution
-         * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
          * @throws CannotInstantiateClass
          */
-        protected function resolveArgument(
-            ReflectionParameter $reflectedParameter,
-            array &$availableArguments,
-            array &$arguments
-        ): bool
+        public function get(string $fullyClassName): object
         {
-            $argumentName = $reflectedParameter->getName();
-            $argumentExists = array_key_exists($argumentName, $availableArguments);
+            $this->assertValidObjectName($fullyClassName);
 
-            if ((null === $reflectedParameter->getType()) && (false === $argumentExists)) {
-                if (!$reflectedParameter->isOptional()) {
-                    // wo/ argument, this is not possible:
-                    // - public function __construct($variable);
-                    throw new MissingTypeForArgument($reflectedParameter);
-                }
+            if ($this->aliasesContainer->has($fullyClassName)) {
+                $fullyClassName = $this->aliasesContainer->get($fullyClassName);
+            }
 
-                return false;
-            } elseif (
-                (
-                    (null !== $reflectedParameter->getType())
-                    && ($reflectedParameter->getType()->isBuiltin())
-                ) && (false === $argumentExists)
+            $reflectedClass = Reflection::from($fullyClassName);
+
+            if (!$reflectedClass->isInstantiable()) {
+                throw new CannotInstantiateClass($reflectedClass);
+            }
+
+            if (
+                (null === $reflectedClass->getConstructor())
+                || (0 === $reflectedClass->getConstructor()->getNumberOfRequiredParameters())
             ) {
-                if (!$reflectedParameter->isOptional()) {
-                    // wo/ argument, this is not possible:
-                    // - public function __construct(bool $variable);
-                    // - public function __construct(int $variable);
-                    // - public function __construct(float $variable);
-                    // - public function __construct(string $variable);
-                    // - public function __construct(object $variable);
-                    // - public function __construct(array $variable);
-                    throw new InvalidTypeForDependencyInjection($reflectedParameter);
-                }
-
-                return false;
-            }
-
-            if (!$argumentExists) {
-                $arguments[] = $this->resolveArgumentWithoutResolution($reflectedParameter);
+                $object = $reflectedClass->newInstance();
+            } elseif (array_key_exists(DependencyInjectorConstructor::class, $reflectedClass->getTraits())) {
+                $object = $reflectedClass->newInstance($this);
             } else {
-                $arguments[] = $this->resolveArgumentWithResolution(
-                    $reflectedParameter,
-                    $availableArguments[$argumentName]
-                );
-
-                unset($availableArguments[$argumentName]);
+                $object = $this->resolveClass($reflectedClass, $fullyClassName);
             }
 
-            return true;
+            return $object;
         }
 
         /**
-         * @param ReflectionParameter $reflectedParameter
+         * @param string $fullyClassName
          *
-         * @return mixed
+         * @return AliasTo
          * @throws CannotFindClassName
-         * @throws CannotInstantiateClass
-         * @throws CannotReflectClass
-         * @throws ClassNameIsIncorrectlyCapitalized
-         * @throws DependencyIdentifierNotFound
-         * @throws InvalidTypeForDependencyIdentifier
-         * @throws InvalidTypeForDependencyInjection
-         * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
-         * @throws WrongArgumentsForDependencyResolution
          */
-        protected function resolveArgumentWithoutResolution(ReflectionParameter $reflectedParameter)
+        public function delegate(string $fullyClassName): AliasTo
         {
-            $argumentName = $reflectedParameter->getName();
-            $reflectedType = Reflection::getNamedType($reflectedParameter);
-            $fullyClassName = $reflectedType->getName();
-            $this->currentArguments->setArgument($argumentName)->asInjection($fullyClassName);
-
-            if ($reflectedParameter->isDefaultValueAvailable()) {
-                $argument = $reflectedParameter->getDefaultValue();
-            } else {
-                $argument = $this->resolveType($reflectedParameter, $reflectedType);
-            }
-
-            return $argument;
+            return $this->aliasesContainer->delegate($fullyClassName);
         }
 
         /**
-         * @param ReflectionParameter $reflectedParameter
-         * @param $argumentResolution
+         * @param string $fullyClassName
          *
-         * @return mixed
+         * @return Arguments
          * @throws CannotFindClassName
-         * @throws CannotInstantiateClass
-         * @throws CannotReflectClass
-         * @throws ClassNameIsIncorrectlyCapitalized
-         * @throws DependencyIdentifierNotFound
-         * @throws InvalidTypeForDependencyIdentifier
-         * @throws InvalidTypeForDependencyInjection
-         * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
-         * @throws WrongArgumentsForDependencyResolution
          */
-        protected function resolveArgumentWithResolution(ReflectionParameter $reflectedParameter, $argumentResolution)
+        public function for(string $fullyClassName): Arguments
         {
-            $argumentName = $reflectedParameter->getName();
-
-            if ($argumentResolution instanceof Injector) {
-                $argument = $this->resolveArgumentValue($reflectedParameter, $argumentResolution);
-            } elseif ($argumentResolution instanceof Singleton) {
-                $argument = $this->resolveArgumentValue($reflectedParameter, $argumentResolution);
-                $this->currentArguments->setArgument($argumentName)->to($argument);
-            } else {
-                $argument = $argumentResolution;
-            }
-
-            return $argument;
-        }
-
-        /**
-         * @param ReflectionParameter $reflectedParameter
-         * @param ClassNameGetter $resolution
-         *
-         * @return mixed
-         * @throws CannotFindClassName
-         * @throws CannotReflectClass
-         * @throws ClassNameIsIncorrectlyCapitalized
-         * @throws DependencyIdentifierNotFound
-         * @throws InvalidTypeForDependencyIdentifier
-         * @throws InvalidTypeForDependencyInjection
-         * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
-         * @throws WrongArgumentsForDependencyResolution
-         * @throws CannotInstantiateClass
-         */
-        protected function resolveArgumentValue(ReflectionParameter $reflectedParameter, ClassNameGetter $resolution)
-        {
-            $reflectedType = Reflection::getNamedType($reflectedParameter);
-            $typeName = $reflectedType->getName();
-
-            return $this->get($resolution->getClassName($typeName));
+            return $this->resolutionContainer->for($fullyClassName);
         }
     }
 } 
