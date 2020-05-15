@@ -12,7 +12,7 @@ namespace JayBeeR\YEDI\Resolution {
     /**
      *
      */
-    class ArgumentValueSetter implements ArgumentType
+    class ArgumentDelegation implements ArgumentType
     {
         protected string $argumentName;
 

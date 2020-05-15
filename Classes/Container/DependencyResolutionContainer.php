@@ -17,7 +17,7 @@ namespace JayBeeR\YEDI\Container {
     };
 
     use JayBeeR\YEDI\Resolution\{
-        ArgumentProvider,
+        ArgumentAllocator,
         Arguments
     };
 
@@ -84,12 +84,12 @@ namespace JayBeeR\YEDI\Container {
          * @return Arguments
          * @throws CannotFindClassName
          */
-        public function for(string $derivedClassName)
+        public function for(string $derivedClassName): Arguments
         {
             $this->assertValidObjectName($derivedClassName);
 
             if (!$this->resolvesDependencies->hasKey($derivedClassName)) {
-                $this->resolvesDependencies->put($derivedClassName, new ArgumentProvider);
+                $this->resolvesDependencies->put($derivedClassName, new ArgumentAllocator);
             }
 
             return $this->resolvesDependencies->get($derivedClassName);

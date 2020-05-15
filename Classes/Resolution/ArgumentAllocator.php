@@ -10,7 +10,7 @@ namespace JayBeeR\YEDI\Resolution {
     /**
      *
      */
-    class ArgumentProvider implements Arguments
+    class ArgumentAllocator implements Arguments
     {
         /**
          * @var array
@@ -24,7 +24,7 @@ namespace JayBeeR\YEDI\Resolution {
          */
         public function setArgument(string $argumentName): ArgumentType
         {
-            return new ArgumentValueSetter($this->arguments, $argumentName, $this);
+            return new ArgumentDelegation($this->arguments, $argumentName, $this);
         }
 
         /**

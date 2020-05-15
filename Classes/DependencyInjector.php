@@ -7,7 +7,6 @@
 
 namespace JayBeeR\YEDI {
 
-    use JayBeeR\YEDI\Container\{DependencyAliasContainer, DependencyResolutionContainer};
     use JayBeeR\YEDI\Failures\{CannotFindClassName,
         CannotInstantiateClass,
         CannotReflectClass,
@@ -17,7 +16,7 @@ namespace JayBeeR\YEDI {
         InvalidTypeForDependencyInjection,
         MissingTypeForArgument,
         WrongArgumentsForDependencyResolution};
-    use JayBeeR\YEDI\Resolution\{AliasTo, Arguments, ClassNameGetter, Injector, Singleton};
+    use JayBeeR\YEDI\Resolution\{ClassNameGetter, Injector, Singleton};
     use ReflectionClass;
     use ReflectionException;
     use ReflectionNamedType;
@@ -26,28 +25,8 @@ namespace JayBeeR\YEDI {
     /**
      * @SuppressWarnings(PHPMD.StaticAccess) Reason: because of Factory calls
      */
-    class DependencyInjector
+    class DependencyInjector extends DependencyResolver
     {
-        use ClassValidation;
-
-        protected DependencyResolutionContainer $resolutionContainer;
-
-        protected DependencyAliasContainer $aliasesContainer;
-
-        protected Arguments $currentArguments;
-
-        /**
-         * @param DependencyAliasContainer $aliasesContainer
-         * @param DependencyResolutionContainer $resolverContainer
-         */
-        public function __construct(
-            DependencyAliasContainer $aliasesContainer = null,
-            DependencyResolutionContainer $resolverContainer = null
-        )
-        {
-            $this->aliasesContainer = $aliasesContainer ?? new DependencyAliasContainer;
-            $this->resolutionContainer = $resolverContainer ?? new DependencyResolutionContainer;
-        }
 
         /**
          * @param ReflectionParameter $reflectedParameter
@@ -298,71 +277,6 @@ namespace JayBeeR\YEDI {
             $typeName = $reflectedType->getName();
 
             return $this->get($resolution->getClassName($typeName));
-        }
-
-        /**
-         * @param string $fullyClassName
-         *
-         * @return mixed
-         * @throws CannotFindClassName
-         * @throws CannotReflectClass
-         * @throws ClassNameIsIncorrectlyCapitalized
-         * @throws DependencyIdentifierNotFound
-         * @throws InvalidTypeForDependencyIdentifier
-         * @throws InvalidTypeForDependencyInjection
-         * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
-         * @throws WrongArgumentsForDependencyResolution
-         * @throws CannotInstantiateClass
-         */
-        public function get(string $fullyClassName): object
-        {
-            $this->assertValidObjectName($fullyClassName);
-
-            if ($this->aliasesContainer->has($fullyClassName)) {
-                $fullyClassName = $this->aliasesContainer->get($fullyClassName);
-            }
-
-            $reflectedClass = Reflection::from($fullyClassName);
-
-            if (!$reflectedClass->isInstantiable()) {
-                throw new CannotInstantiateClass($reflectedClass);
-            }
-
-            if (
-                (null === $reflectedClass->getConstructor())
-                || (0 === $reflectedClass->getConstructor()->getNumberOfRequiredParameters())
-            ) {
-                $object = $reflectedClass->newInstance();
-            } elseif (array_key_exists(DependencyInjectorConstructor::class, $reflectedClass->getTraits())) {
-                $object = $reflectedClass->newInstance($this);
-            } else {
-                $object = $this->resolveClass($reflectedClass, $fullyClassName);
-            }
-
-            return $object;
-        }
-
-        /**
-         * @param string $fullyClassName
-         *
-         * @return AliasTo
-         * @throws CannotFindClassName
-         */
-        public function delegate(string $fullyClassName): AliasTo
-        {
-            return $this->aliasesContainer->delegate($fullyClassName);
-        }
-
-        /**
-         * @param string $fullyClassName
-         *
-         * @return Arguments
-         * @throws CannotFindClassName
-         */
-        public function for(string $fullyClassName): Arguments
-        {
-            return $this->resolutionContainer->for($fullyClassName);
         }
     }
 } 
