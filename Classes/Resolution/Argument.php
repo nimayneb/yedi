@@ -10,11 +10,8 @@ namespace JayBeeR\YEDI\Resolution {
     /**
      *
      */
-    abstract class Argument
+    abstract class Argument implements ClassNameGetter
     {
-        /**
-         * @var string
-         */
         protected ?string $className;
 
         /**

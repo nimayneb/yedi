@@ -10,11 +10,9 @@ namespace JayBeeR\YEDI\Container {
     use Ds\Map;
     use JayBeeR\YEDI\ClassValidation;
 
-    use JayBeeR\YEDI\Failures\{
-        CannotFindClassName,
+    use JayBeeR\YEDI\Failures\{CannotFindClassName,
         DependencyIdentifierNotFound,
-        InvalidTypeForDependencyIdentifier
-    };
+        InvalidTypeForDependencyIdentifier};
 
     use JayBeeR\YEDI\Resolution\{
         ArgumentAllocator,
@@ -89,7 +87,8 @@ namespace JayBeeR\YEDI\Container {
             $this->assertValidObjectName($derivedClassName);
 
             if (!$this->resolvesDependencies->hasKey($derivedClassName)) {
-                $this->resolvesDependencies->put($derivedClassName, new ArgumentAllocator);
+                $allocator = new ArgumentAllocator;
+                $this->resolvesDependencies->put($derivedClassName, $allocator);
             }
 
             return $this->resolvesDependencies->get($derivedClassName);

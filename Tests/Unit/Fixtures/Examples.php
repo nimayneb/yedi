@@ -126,7 +126,7 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
     class MyClassWithMissingType
     {
-        public function __construct($myClassA)
+        public function __construct($property)
         {
 
         }
@@ -134,7 +134,7 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
     class MyClassWithIntegerType
     {
-        public function __construct(int $myClassA)
+        public function __construct(int $property)
         {
 
         }
@@ -142,7 +142,7 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
     class MyClassWithFloatType
     {
-        public function __construct(float $myClassA)
+        public function __construct(float $property)
         {
 
         }
@@ -150,7 +150,7 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
     class MyClassWithStringType
     {
-        public function __construct(string $myClassA)
+        public function __construct(string $property)
         {
 
         }
@@ -158,7 +158,7 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
     class MyClassWithObjectType
     {
-        public function __construct(object $myClassA)
+        public function __construct(object $property)
         {
 
         }
@@ -166,7 +166,7 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
     class MyClassWithBooleanType
     {
-        public function __construct(bool $myClassA)
+        public function __construct(bool $property)
         {
 
         }
@@ -174,7 +174,15 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
     class MyClassWithArrayType
     {
-        public function __construct(array $myClassA)
+        public function __construct(array $property)
+        {
+
+        }
+    }
+
+    class MyClassWithDefaultType
+    {
+        public function __construct(int $property = 123)
         {
 
         }

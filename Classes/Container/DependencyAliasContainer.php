@@ -10,11 +10,9 @@ namespace JayBeeR\YEDI\Container {
     use Ds\Map;
     use JayBeeR\YEDI\ClassValidation;
 
-    use JayBeeR\YEDI\Failures\{
-        CannotFindClassName,
+    use JayBeeR\YEDI\Failures\{CannotFindClassName,
         DependencyIdentifierNotFound,
-        InvalidTypeForDependencyIdentifier
-    };
+        InvalidTypeForDependencyIdentifier};
 
     use JayBeeR\YEDI\Resolution\{
         AliasTo,
@@ -31,9 +29,6 @@ namespace JayBeeR\YEDI\Container {
     {
         use ClassValidation;
 
-        /**
-         * @var Map
-         */
         protected Map $aliases;
 
         /**

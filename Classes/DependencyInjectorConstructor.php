@@ -31,14 +31,14 @@ namespace JayBeeR\YEDI {
          *
          * @return mixed
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
-         * @throws CannotInstantiateClass
-         * @throws MissingTypeForArgument
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
-         * @throws ReflectionException (cannot occur)
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
          */
         protected function get(string $fullyClassName): object

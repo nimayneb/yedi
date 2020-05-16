@@ -38,6 +38,7 @@ namespace JayBeeR\YEDI {
         /**
          * @param ReflectionClass $reflectedClass
          * @param Arguments $allocator
+         * @param DependencyInjector $di
          */
         public function __construct(ReflectionClass $reflectedClass, Arguments $allocator, DependencyInjector $di)
         {
@@ -95,15 +96,15 @@ namespace JayBeeR\YEDI {
          *
          * @return bool
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
-         * @throws WrongArgumentsForDependencyResolution
          * @throws MissingTypeForArgument
          * @throws ReflectionException (cannot occur)
-         * @throws CannotInstantiateClass
+         * @throws WrongArgumentsForDependencyResolution
          */
         public function resolveArgument(
             ReflectionParameter $reflectedParameter,
@@ -200,7 +201,7 @@ namespace JayBeeR\YEDI {
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
          * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
+         * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
          */
         protected function resolveArgumentWithResolution(ReflectionParameter $reflectedParameter, $argumentResolution)
@@ -232,7 +233,7 @@ namespace JayBeeR\YEDI {
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
          * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
+         * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
          */
         protected function resolveType(ReflectionParameter $reflectedParameter, ReflectionNamedType $reflectedType)
@@ -252,15 +253,15 @@ namespace JayBeeR\YEDI {
          *
          * @return mixed
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
          * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
+         * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
-         * @throws CannotInstantiateClass
          */
         protected function resolveArgumentValue(ReflectionParameter $reflectedParameter, ClassNameGetter $resolution)
         {

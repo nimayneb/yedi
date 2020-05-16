@@ -33,7 +33,7 @@ namespace JayBeeR\YEDI\Resolution {
         }
 
         /**
-         * @param $fullyClassName
+         * @param string|null $fullyClassName
          *
          * @return Arguments
          */

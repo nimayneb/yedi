@@ -12,9 +12,6 @@ namespace JayBeeR\YEDI\Resolution {
      */
     class ArgumentAllocator implements Arguments
     {
-        /**
-         * @var array
-         */
         protected array $arguments = [];
 
         /**

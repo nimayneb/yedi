@@ -77,33 +77,68 @@ namespace JayBeeR\YEDI {
         }
 
         /**
+         * @param $fullyClassName
+         * @param mixed ...$arguments
+         *
+         * @return object|mixed
+         * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         * @throws ReflectionException (cannot occur)
+         */
+        public function new($fullyClassName, ...$arguments): object
+        {
+            $reflectedClass = $this->getReflectionClass($fullyClassName);
+            $parameters = $reflectedClass->getConstructor()->getParameters();
+
+            if (count($arguments)) {
+                $parameters = array_slice($parameters, count($arguments));
+            }
+
+            $additionalArguments = [];
+
+            foreach ($parameters as $parameter) {
+                if (($parameter->hasType()) && ($parameter->getType() === DependencyInjector::class)) {
+                    $additionalArguments[] = $this;
+
+                    break;
+                } elseif ($parameter->isDefaultValueAvailable()) {
+                    $additionalArguments[] = $parameter->getDefaultValue();
+                }
+            }
+
+            $arguments = array_merge($arguments, $additionalArguments);
+
+            if (count($arguments)) {
+                $object = $reflectedClass->newInstanceArgs($arguments);
+            } else {
+                $object = $reflectedClass->newInstance();
+            }
+
+            return $object;
+        }
+
+        /**
          * @param string $fullyClassName
          *
-         * @return mixed
+         * @return object|mixed
          * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws InvalidTypeForDependencyInjection
          * @throws MissingTypeForArgument
-         * @throws ReflectionException (cannot occur)
+         * @throws ReflectionException
          * @throws WrongArgumentsForDependencyResolution
-         * @throws CannotInstantiateClass
          */
         public function get(string $fullyClassName): object
         {
-            $this->assertValidObjectName($fullyClassName);
-
-            if ($this->aliasesContainer->has($fullyClassName)) {
-                $fullyClassName = $this->aliasesContainer->get($fullyClassName);
-            }
-
-            $reflectedClass = Reflection::from($fullyClassName);
-
-            if (!$reflectedClass->isInstantiable()) {
-                throw new CannotInstantiateClass($reflectedClass);
-            }
+            $reflectedClass = $this->getReflectionClass($fullyClassName);
 
             if (
                 (null === $reflectedClass->getConstructor())
@@ -117,6 +152,34 @@ namespace JayBeeR\YEDI {
             }
 
             return $object;
+        }
+
+        /**
+         * @param string $fullyClassName
+         *
+         * @return ReflectionClass
+         * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         */
+        protected function getReflectionClass(string $fullyClassName): ReflectionClass
+        {
+            $this->assertValidObjectName($fullyClassName);
+
+            if ($this->aliasesContainer->has($fullyClassName)) {
+                $fullyClassName = $this->aliasesContainer->get($fullyClassName);
+            }
+
+            $reflectedClass = Reflection::from($fullyClassName);
+
+            if (!$reflectedClass->isInstantiable()) {
+                throw new CannotInstantiateClass($reflectedClass);
+            }
+
+            return $reflectedClass;
         }
 
         /**
