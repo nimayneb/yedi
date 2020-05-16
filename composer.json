@@ -31,7 +31,8 @@
         "nimayneb/phpqg": "1.0.0"
     },
     "scripts": {
-        "tests": "phpunit --coverage-text=report.txt --whitelist Classes",
+        "tests": "phpunit --coverage-text=coverage-report.log --whitelist Classes",
+        "coverage": "phpunit --coverage-html=Coverage --whitelist Classes",
         "phpmd": "phpmd Classes ansi vendor/nimayneb/phpqg/phpmd.xml"
     },
     "repositories": [
