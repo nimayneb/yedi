@@ -200,7 +200,7 @@ are requested via the DI for the first time. The order here can depend on when o
 
 ## PDepend
 
-![Build Status](Resources/pyramid.svg)
+![Build Status](Resources/PDependPyramid.svg)
 
 - NOP - Number Of Packages
 - NOC - Number Of Classes
