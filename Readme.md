@@ -104,7 +104,8 @@ The resolution container should be used for the instantiating of a dependency cl
             string $name, 
             Foreign\HelperInterface $helper, 
             int $limit,
-            bool $hidden
+            bool $hidden,
+            Foreign\Service $service
         );
     }
 
@@ -114,6 +115,7 @@ The resolution container should be used for the instantiating of a dependency cl
         ->setArgument('name')   ->to('value')
         ->setArgument('helper') ->asInjection(My\Own\Helper::class)
         ->setArgument('hidden') ->to(false)
+        ->setArgument('service') ->asSingleton(My\Own\Service::class)
     ;
     
     $foreignClass = $di->get(ForeignClass::class);
@@ -122,7 +124,11 @@ The resolution container should be used for the instantiating of a dependency cl
 That would be the same as with the following implementation:
     
     $dependentHelper = new My\Own\Helper;
-    $object = new ForeignClass(123, 'value', $dependentHelper, false);
+    
+    // should return singleton instance via Factory
+    $service = Foreign\Service::get(); 
+    
+    $object = new ForeignClass(123, 'value', $dependentHelper, false, $service);
        
        
 But why you should use this?
@@ -148,12 +154,12 @@ That is the solution:
 
     $di = new JayBeeR\YEDI\DependencyInjector;
     $di->for(MyClassA::class)
-        ->setArgument(ForeignInterface::class)
+        ->setArgument('interface')
         ->asInjection(MyClassInterfaceA::class)
     ;
 
     $di->for(MyClassB::class)
-        ->setArgument(ForeignInterface::class)
+        ->setArgument('interface')
         ->asInjection(MyClassInterfaceB::class)
     ;
     
