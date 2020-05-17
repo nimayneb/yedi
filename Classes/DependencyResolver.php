@@ -106,7 +106,7 @@ namespace JayBeeR\YEDI {
          * @throws ReflectionException (cannot occur)
          * @throws WrongArgumentsForDependencyResolution
          */
-        public function resolveArgument(
+        protected function resolveArgument(
             ReflectionParameter $reflectedParameter,
             array &$availableArguments,
             array &$arguments

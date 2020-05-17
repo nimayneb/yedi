@@ -11,4 +11,5 @@ install:
 script:
   - composer tests
   - composer phpmd
+  - composer pdepend
   - cat coverage-report.txt

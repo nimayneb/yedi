@@ -197,3 +197,18 @@ are requested via the DI for the first time. The order here can depend on when o
 - Description for all exceptions <3
 - Tests for all exceptions
 - Throws more Exceptions?
+
+## PDepend
+
+![Build Status](Resources/pyramid.svg)
+
+- NOP - Number Of Packages
+- NOC - Number Of Classes
+- NOM - Number Of Methods
+- LOC – Lines of Code
+- CYCLO - Cyclomatic complexity
+- CALLS - number of distinct function- and method-calls
+- ANDC - Average Number of Derived Classes
+- AHH - Average Hierarchy Height
+
+![Build Status](Resources/DependencyInjector.png)
