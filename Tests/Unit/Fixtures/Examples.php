@@ -53,7 +53,7 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
         public MyClassA $myClassA;
 
-        public function injectDependencies()
+        protected function injectDependencies()
         {
             $this->myClassA = $this->get(MyClassA::class);
         }
@@ -65,7 +65,7 @@ namespace JayBeeR\Tests\Unit\Fixtures {
 
         public MyClassA_YEDI $myClassA_YEDI;
 
-        public function injectDependencies()
+        protected function injectDependencies()
         {
             $this->myClassA_YEDI = $this->get(MyClassA_YEDI::class);
         }

@@ -27,6 +27,15 @@ namespace JayBeeR\YEDI {
         protected ?DependencyInjector $di = null;
 
         /**
+         * @param DependencyInjector $di
+         */
+        public function __construct(DependencyInjector $di = null)
+        {
+            $this->di = $di ?? new DependencyInjector;
+            $this->injectDependencies();
+        }
+
+        /**
          * @param string $fullyClassName
          *
          * @return mixed
@@ -47,17 +56,8 @@ namespace JayBeeR\YEDI {
         }
 
         /**
-         * @param DependencyInjector $di
-         */
-        public function __construct(DependencyInjector $di)
-        {
-            $this->di = $di;
-            $this->injectDependencies();
-        }
-
-        /**
          * @return void
          */
-        abstract public function injectDependencies();
+        abstract protected function injectDependencies();
     }
 }
