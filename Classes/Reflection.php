@@ -7,12 +7,7 @@
 
 namespace JayBeeR\YEDI {
 
-    use JayBeeR\YEDI\Failures\{
-        CannotReflectClass,
-        ClassNameIsIncorrectlyCapitalized,
-        MissingTypeForArgument
-    };
-
+    use JayBeeR\YEDI\Failures\{CannotReflectClass, ClassNameIsIncorrectlyCapitalized, MissingTypeForArgument};
     use ReflectionClass;
     use ReflectionException;
     use ReflectionNamedType;

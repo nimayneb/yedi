@@ -16,6 +16,7 @@ namespace JayBeeR\YEDI\Failures {
     class WrongArgumentsForDependencyResolution extends Exception
     {
         protected array$restArguments;
+
         /**
          * @param ReflectionClass $reflectedClass
          * @param array $arguments

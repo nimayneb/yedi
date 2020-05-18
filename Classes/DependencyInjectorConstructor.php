@@ -15,8 +15,8 @@ namespace JayBeeR\YEDI {
         InvalidTypeForDependencyIdentifier,
         InvalidTypeForDependencyInjection,
         MissingTypeForArgument,
-        WrongArgumentsForDependencyResolution};
-
+        WrongArgumentsForDependencyResolution
+    };
     use ReflectionException;
 
     /**

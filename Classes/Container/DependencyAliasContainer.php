@@ -9,16 +9,8 @@ namespace JayBeeR\YEDI\Container {
 
     use Ds\Map;
     use JayBeeR\YEDI\ClassValidation;
-
-    use JayBeeR\YEDI\Failures\{CannotFindClassName,
-        DependencyIdentifierNotFound,
-        InvalidTypeForDependencyIdentifier};
-
-    use JayBeeR\YEDI\Resolution\{
-        AliasTo,
-        ClassDelegation
-    };
-
+    use JayBeeR\YEDI\Failures\{CannotFindClassName, DependencyIdentifierNotFound, InvalidTypeForDependencyIdentifier};
+    use JayBeeR\YEDI\Resolution\{ClassDelegation, DelegationType};
     use Psr\Container\ContainerInterface;
 
     /**
@@ -44,11 +36,11 @@ namespace JayBeeR\YEDI\Container {
          *
          * @param mixed $fullyClassName Identifier of the entry to look for.
          *
-         * @return string Entry.
+         * @return object Entry.
          * @throws InvalidTypeForDependencyIdentifier Error while retrieving the entry.
          * @throws DependencyIdentifierNotFound  No entry was found for **this** identifier.
          */
-        public function get($fullyClassName): string
+        public function get($fullyClassName): object
         {
             // TODO: PSR-11 for PHP 7.4?
             if (!$this->has($fullyClassName)) {
@@ -82,10 +74,10 @@ namespace JayBeeR\YEDI\Container {
         /**
          * @param $fullyClassName
          *
-         * @return AliasTo
+         * @return DelegationType
          * @throws CannotFindClassName
          */
-        public function delegate($fullyClassName): AliasTo
+        public function delegate($fullyClassName): DelegationType
         {
             $this->assertValidObjectName($fullyClassName);
 

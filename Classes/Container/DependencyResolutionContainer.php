@@ -9,16 +9,8 @@ namespace JayBeeR\YEDI\Container {
 
     use Ds\Map;
     use JayBeeR\YEDI\ClassValidation;
-
-    use JayBeeR\YEDI\Failures\{CannotFindClassName,
-        DependencyIdentifierNotFound,
-        InvalidTypeForDependencyIdentifier};
-
-    use JayBeeR\YEDI\Resolution\{
-        ArgumentAllocator,
-        Arguments
-    };
-
+    use JayBeeR\YEDI\Failures\{CannotFindClassName, DependencyIdentifierNotFound, InvalidTypeForDependencyIdentifier};
+    use JayBeeR\YEDI\Resolution\{ArgumentAllocator, Arguments};
     use Psr\Container\ContainerInterface;
 
     /**

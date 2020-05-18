@@ -24,7 +24,6 @@ namespace JayBeeR\YEDI {
     use ReflectionParameter;
 
     /**
-     *
      * @SuppressWarnings(PHPMD.StaticAccess) Reason: because of Factory calls
      */
     class DependencyResolver

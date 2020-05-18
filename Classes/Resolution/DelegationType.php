@@ -10,11 +10,21 @@ namespace JayBeeR\YEDI\Resolution {
     /**
      *
      */
-    interface AliasTo
+    interface DelegationType
     {
         /**
          * @param string $fullyClassName
          */
         public function to(string $fullyClassName): void;
+
+        /**
+         * @param string|null $fullyClassName
+         */
+        public function asSingleton(?string $fullyClassName): void;
+
+        /**
+         * @param object $object
+         */
+        public function toSingleton(object $object): void;
     }
 }

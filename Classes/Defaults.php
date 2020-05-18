@@ -8,13 +8,11 @@
 namespace JayBeeR\YEDI {
 
     /**
-     *
      * @SuppressWarnings(PHPMD.LongVariable) Reason: because it is configuration only
      */
     class Defaults
     {
         /**
-         *
          * @var bool
          */
         public static bool $classNamesAreCaseSensitive = false;

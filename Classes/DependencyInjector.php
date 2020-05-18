@@ -11,6 +11,7 @@ namespace JayBeeR\YEDI {
     use JayBeeR\YEDI\Container\DependencyResolutionContainer;
     use JayBeeR\YEDI\Failures\{CannotFindClassName,
         CannotInstantiateClass,
+        CannotReconstructSingletonClass,
         CannotReflectClass,
         ClassNameIsIncorrectlyCapitalized,
         DependencyIdentifierNotFound,
@@ -19,7 +20,7 @@ namespace JayBeeR\YEDI {
         MissingTypeForArgument,
         WrongArgumentsForDependencyResolution
     };
-    use JayBeeR\YEDI\Resolution\{AliasTo, Arguments};
+    use JayBeeR\YEDI\Resolution\{ArgumentInjection, Arguments, ArgumentSingleton, DelegationType};
     use ReflectionClass;
     use ReflectionException;
 
@@ -88,8 +89,40 @@ namespace JayBeeR\YEDI {
          * @throws DependencyIdentifierNotFound
          * @throws InvalidTypeForDependencyIdentifier
          * @throws ReflectionException (cannot occur)
+         * @throws CannotReconstructSingletonClass
          */
         public function new($fullyClassName, ...$arguments): object
+        {
+            if ($this->aliasesContainer->has($fullyClassName)) {
+                $object = $this->aliasesContainer->get($fullyClassName);
+
+                if ($object instanceof ArgumentSingleton) {
+                    throw new CannotReconstructSingletonClass($fullyClassName);
+                } elseif ($object instanceof ArgumentInjection) {
+                    $object = $this->instantiateClass(
+                        $object->getClassName($fullyClassName),
+                        $arguments
+                    );
+                }
+            } else {
+                $object = $this->instantiateClass($fullyClassName, $arguments);
+            }
+
+            return $object;
+        }
+
+        /**
+         * @param string $fullyClassName
+         * @param mixed ...$arguments
+         *
+         * @return object
+         * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws ReflectionException
+         */
+        protected function instantiateClass(string $fullyClassName, array $arguments = []): object
         {
             $reflectedClass = $this->getReflectionClass($fullyClassName);
             $parameters = $reflectedClass->getConstructor()->getParameters();
@@ -138,6 +171,44 @@ namespace JayBeeR\YEDI {
          */
         public function get(string $fullyClassName): object
         {
+            if ($this->aliasesContainer->has($fullyClassName)) {
+                $object = $this->aliasesContainer->get($fullyClassName);
+
+                if ($object instanceof ArgumentSingleton) {
+                    $object = $this->instantiateClassWithResolution(
+                        $object->getClassName($fullyClassName)
+                    );
+
+                    $this->aliasesContainer->delegate($fullyClassName)->toSingleton($object);
+                } elseif ($object instanceof ArgumentInjection) {
+                    $object = $this->instantiateClassWithResolution(
+                        $object->getClassName($fullyClassName)
+                    );
+                }
+            } else {
+                $object = $this->instantiateClassWithResolution($fullyClassName);
+            }
+
+            return $object;
+        }
+
+        /**
+         * @param string $fullyClassName
+         *
+         * @return object
+         * @throws CannotFindClassName
+         * @throws CannotInstantiateClass
+         * @throws CannotReflectClass
+         * @throws ClassNameIsIncorrectlyCapitalized
+         * @throws DependencyIdentifierNotFound
+         * @throws InvalidTypeForDependencyIdentifier
+         * @throws InvalidTypeForDependencyInjection
+         * @throws MissingTypeForArgument
+         * @throws ReflectionException
+         * @throws WrongArgumentsForDependencyResolution
+         */
+        protected function instantiateClassWithResolution(string $fullyClassName): object
+        {
             $reflectedClass = $this->getReflectionClass($fullyClassName);
 
             if (
@@ -162,16 +233,10 @@ namespace JayBeeR\YEDI {
          * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
-         * @throws DependencyIdentifierNotFound
-         * @throws InvalidTypeForDependencyIdentifier
          */
         protected function getReflectionClass(string $fullyClassName): ReflectionClass
         {
             $this->assertValidObjectName($fullyClassName);
-
-            if ($this->aliasesContainer->has($fullyClassName)) {
-                $fullyClassName = $this->aliasesContainer->get($fullyClassName);
-            }
 
             $reflectedClass = Reflection::from($fullyClassName);
 
@@ -185,10 +250,10 @@ namespace JayBeeR\YEDI {
         /**
          * @param string $fullyClassName
          *
-         * @return AliasTo
+         * @return DelegationType
          * @throws CannotFindClassName
          */
-        public function delegate(string $fullyClassName): AliasTo
+        public function delegate(string $fullyClassName): DelegationType
         {
             return $this->aliasesContainer->delegate($fullyClassName);
         }
