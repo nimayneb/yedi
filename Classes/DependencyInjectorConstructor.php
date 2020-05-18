@@ -24,14 +24,14 @@ namespace JayBeeR\YEDI {
      */
     trait DependencyInjectorConstructor
     {
-        protected ?DependencyInjector $di = null;
+        protected ?DependencyInjector $di;
 
         /**
          * @param DependencyInjector $di
          */
-        public function __construct(DependencyInjector $di = null)
+        public function __construct(DependencyInjector $di)
         {
-            $this->di = $di ?? new DependencyInjector;
+            $this->di = $di;
             $this->injectDependencies();
         }
 

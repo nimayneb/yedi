@@ -13,11 +13,10 @@
     <node x="0.0" y="591.0">\JayBeeR\YEDI\Resolution\Arguments</node>
     <node x="0.0" y="104.0">\JayBeeR\YEDI\Resolution\Injector</node>
     <node x="306.54166666666663" y="206.0">\JayBeeR\YEDI\Resolution\ArgumentSingleton</node>
-    <node x="611.0" y="591.0">\JayBeeR\YEDI\Defaults</node>
     <node x="558.0" y="0.0">\JayBeeR\YEDI\Resolution\ArgumentType</node>
+    <node x="611.0" y="591.0">\JayBeeR\YEDI\Defaults</node>
     <node x="0.0" y="836.0">\JayBeeR\YEDI\DependencyResolver</node>
     <node x="116.0" y="0.0">\JayBeeR\YEDI\Resolution\ClassNameGetter</node>
-    <node x="540.0" y="302.0">\JayBeeR\YEDI\ClassValidation</node>
     <node x="0.0" y="716.0">\JayBeeR\YEDI\Resolution\ArgumentAllocator</node>
     <node x="286.0" y="591.0">\JayBeeR\YEDI\Reflection</node>
     <node x="280.0" y="416.0">\JayBeeR\YEDI\Container\DependencyResolutionContainer</node>
@@ -40,12 +39,6 @@
       <point x="461.0" y="78.0" />
       <point x="343.5" y="78.0" />
       <point x="91.0" y="26.5" />
-    </edge>
-    <edge source="\JayBeeR\YEDI\Container\DependencyAliasContainer" target="\JayBeeR\YEDI\ClassValidation">
-      <point x="0.0" y="-48.5" />
-      <point x="957.0" y="380.0" />
-      <point x="797.5" y="380.0" />
-      <point x="103.0" y="26.5" />
     </edge>
     <edge source="\JayBeeR\YEDI\Resolution\ArgumentDelegation" target="\JayBeeR\YEDI\Resolution\ArgumentType">
       <point x="0.0" y="-48.5" />
@@ -71,10 +64,6 @@
       <point x="184.25" y="181.0" />
       <point x="-68.25" y="26.5" />
     </edge>
-    <edge source="\JayBeeR\YEDI\DependencyInjector" target="\JayBeeR\YEDI\ClassValidation">
-      <point x="0.0" y="-59.5" />
-      <point x="0.0" y="26.5" />
-    </edge>
     <edge source="\JayBeeR\YEDI\Resolution\ArgumentSingleton" target="\JayBeeR\YEDI\Resolution\Argument">
       <point x="-42.0" y="-25.5" />
       <point x="348.54166666666663" y="181.0" />
@@ -87,14 +76,8 @@
       <point x="461.0" y="181.0" />
       <point x="0.0" y="25.5" />
     </edge>
-    <edge source="\JayBeeR\YEDI\Container\DependencyResolutionContainer" target="\JayBeeR\YEDI\ClassValidation">
-      <point x="0.0" y="-48.5" />
-      <point x="412.0" y="380.0" />
-      <point x="591.5" y="380.0" />
-      <point x="-103.0" y="26.5" />
-    </edge>
   </edges>
-  <settings layout="Hierarchic Group" zoom="0.8804960541149943" x="394.5" y="548.4295774647887" />
+  <settings layout="Hierarchic Group" zoom="0.7337733773377337" x="534.5" y="444.5" />
   <SelectedNodes>
     <node>\JayBeeR\YEDI\Resolution\DelegationType</node>
   </SelectedNodes>

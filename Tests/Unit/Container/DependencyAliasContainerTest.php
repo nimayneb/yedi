@@ -5,7 +5,7 @@
  * See LICENSE.txt that was shipped with this package.
  */
 
-namespace JayBeeR\Tests\Unit\Container {
+namespace JayBeeR\YEDI\Tests\Unit\Container {
 
     use JayBeeR\Tests\Unit\Fixtures\MyClassA;
     use JayBeeR\Tests\Unit\Fixtures\MyAbstractA;
