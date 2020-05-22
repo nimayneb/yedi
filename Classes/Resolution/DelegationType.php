@@ -20,7 +20,7 @@ namespace JayBeeR\YEDI\Resolution {
         /**
          * @param string|null $fullyClassName
          */
-        public function asSingleton(?string $fullyClassName): void;
+        public function asSingleton(string $fullyClassName = null): void;
 
         /**
          * @param object $object

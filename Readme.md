@@ -8,6 +8,7 @@ This is a small and easy dependency injection (also called DI) framework.
 
 - Fluent-speaking interface
 - Containers are PSR-11 compatible...
+- Use of data structure map (see https://www.php.net/manual/en/class.ds-map.php)
 - Delegate classes / interfaces or traits to another and concrete class (see "Use of Alias Container")
 - Instantiating dependencies with configured constructor arguments (see "Use of Resolution Container")
 - Use singleton behaviour without using it as an anti-pattern (each class can only exist once if you want to)

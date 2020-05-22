@@ -54,14 +54,14 @@ namespace JayBeeR\YEDI\Resolution {
         }
 
         /**
-         * @param string|null $fullyClassName
+         * @param string $fullyClassName
          *
          * @throws CannotFindClassName
          * @throws CannotInstantiateClass
          * @throws CannotReflectClass
          * @throws ClassNameIsIncorrectlyCapitalized
          */
-        public function asSingleton(?string $fullyClassName): void
+        public function asSingleton(string $fullyClassName = null): void
         {
             $fullyClassName = $fullyClassName ?? $this->fromClassName;
 

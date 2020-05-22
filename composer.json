@@ -29,11 +29,13 @@
         "phpunit/phpunit": "^7.5",
         "nimayneb/phpqg": "1.0.0",
         "phpmd/phpmd": "^2.8",
-        "pdepend/pdepend": "^2.7"
+        "pdepend/pdepend": "^2.7",
+        "phpmetrics/phpmetrics": "^2.6"
     },
     "scripts": {
         "tests": "phpunit --coverage-text=coverage-report.log --whitelist Classes",
         "coverage": "phpunit --coverage-html=Coverage --whitelist Classes",
+        "phpmetrics": "phpmetrics --report-html=Metrics Classes",
         "phpmd": "phpmd Classes ansi vendor/nimayneb/phpqg/phpmd.xml",
         "pdepend": "pdepend --jdepend-chart=Resources/PDependChart.svg --overview-pyramid=Resources/PDependPyramid.svg Classes"
     },

@@ -6,3 +6,4 @@ composer.lock
 .phpunit*
 coverage-report.log
 Coverage
+Metrics
