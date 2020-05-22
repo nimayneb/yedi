@@ -87,4 +87,3 @@ namespace JayBeeR\YEDI\Container {
         }
     }
 }
-

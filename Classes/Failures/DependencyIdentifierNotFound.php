@@ -52,7 +52,7 @@ namespace JayBeeR\YEDI\Failures {
                     break;
                 }
 
-                default;
+                default:
             }
 
             return $name;
@@ -66,4 +66,4 @@ namespace JayBeeR\YEDI\Failures {
             // TODO: Implement describe() method.
         }
     }
-} 
+}

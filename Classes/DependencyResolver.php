@@ -71,8 +71,7 @@ namespace JayBeeR\YEDI {
                         $reflectedParameter,
                         $availableArguments,
                         $arguments
-                    )) {
-
+                )) {
                     break;
                 }
             }
@@ -271,4 +270,4 @@ namespace JayBeeR\YEDI {
         }
     }
 
-} 
+}

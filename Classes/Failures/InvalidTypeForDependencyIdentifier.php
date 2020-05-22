@@ -25,7 +25,7 @@ namespace JayBeeR\YEDI\Failures {
             parent::__construct(
                 sprintf(
                     'Invalid type <%s> for dependency identifier.',
-                    ('object' === $type) ? get_class($identifier) : $type
+                    ($type === 'object') ? get_class($identifier) : $type
                 )
             );
         }
@@ -38,4 +38,4 @@ namespace JayBeeR\YEDI\Failures {
             // TODO: Implement describe() method.
         }
     }
-} 
+}

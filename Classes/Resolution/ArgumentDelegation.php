@@ -73,4 +73,4 @@ namespace JayBeeR\YEDI\Resolution {
             return $this->container;
         }
     }
-} 
+}

@@ -101,4 +101,4 @@ namespace JayBeeR\YEDI\Resolution {
             }
         }
     }
-} 
+}

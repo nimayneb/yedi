@@ -57,4 +57,4 @@ namespace JayBeeR\YEDI {
             return $reflectedParameter->getType();
         }
     }
-} 
+}

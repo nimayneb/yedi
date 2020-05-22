@@ -17,4 +17,4 @@ namespace JayBeeR\YEDI {
          */
         public static bool $classNamesAreCaseSensitive = false;
     }
-} 
+}

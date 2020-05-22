@@ -15,7 +15,7 @@ namespace JayBeeR\YEDI\Failures {
      */
     class WrongArgumentsForDependencyResolution extends Exception
     {
-        protected array$restArguments;
+        protected array $restArguments;
 
         /**
          * @param ReflectionClass $reflectedClass
@@ -45,4 +45,4 @@ namespace JayBeeR\YEDI\Failures {
             // TODO: Implement describe() method.
         }
     }
-} 
+}

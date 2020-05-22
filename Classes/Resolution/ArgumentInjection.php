@@ -13,4 +13,4 @@ namespace JayBeeR\YEDI\Resolution {
     class ArgumentInjection extends Argument implements Injector
     {
     }
-} 
+}

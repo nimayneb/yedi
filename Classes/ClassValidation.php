@@ -30,4 +30,4 @@ namespace JayBeeR\YEDI {
             }
         }
     }
-} 
+}

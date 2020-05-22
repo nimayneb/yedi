@@ -30,14 +30,18 @@
         "nimayneb/phpqg": "1.0.0",
         "phpmd/phpmd": "^2.8",
         "pdepend/pdepend": "^2.7",
-        "phpmetrics/phpmetrics": "^2.6"
+        "phpmetrics/phpmetrics": "^2.6",
+        "captainhook/captainhook": "^5.3",
+        "squizlabs/php_codesniffer": "^3.5"
     },
     "scripts": {
         "tests": "phpunit --coverage-text=coverage-report.log --whitelist Classes",
         "coverage": "phpunit --coverage-html=Coverage --whitelist Classes",
         "phpmetrics": "phpmetrics --report-html=Metrics Classes",
         "phpmd": "phpmd Classes ansi vendor/nimayneb/phpqg/phpmd.xml",
-        "pdepend": "pdepend --jdepend-chart=Resources/PDependChart.svg --overview-pyramid=Resources/PDependPyramid.svg Classes"
+        "phpcs": "phpcs --colors vendor/nimayneb/phpqg/phpmd.xml Classes",
+        "pdepend": "pdepend --jdepend-chart=Resources/PDependChart.svg --overview-pyramid=Resources/PDependPyramid.svg Classes",
+        "post-autoload-dump": "captainhook install --force --skip-existing"
     },
     "repositories": [
         {

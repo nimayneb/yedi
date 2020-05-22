@@ -84,4 +84,4 @@ namespace JayBeeR\YEDI\Container {
             return new ClassDelegation($this->aliases, $fullyClassName);
         }
     }
-} 
+}

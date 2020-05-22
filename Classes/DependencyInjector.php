@@ -7,8 +7,7 @@
 
 namespace JayBeeR\YEDI {
 
-    use JayBeeR\YEDI\Container\DependencyAliasContainer;
-    use JayBeeR\YEDI\Container\DependencyResolutionContainer;
+    use JayBeeR\YEDI\Container\{DependencyAliasContainer, DependencyResolutionContainer};
     use JayBeeR\YEDI\Failures\{CannotFindClassName,
         CannotInstantiateClass,
         CannotReconstructSingletonClass,
@@ -211,12 +210,14 @@ namespace JayBeeR\YEDI {
         {
             $reflectedClass = $this->getReflectionClass($fullyClassName);
 
-            if (
-                (null === $reflectedClass->getConstructor())
+            if ((null === $reflectedClass->getConstructor())
                 || (0 === $reflectedClass->getConstructor()->getNumberOfRequiredParameters())
             ) {
                 $object = $reflectedClass->newInstance();
-            } elseif (array_key_exists(DependencyInjectorConstructor::class, $reflectedClass->getTraits())) {
+            } elseif (array_key_exists(
+                DependencyInjectorConstructor::class,
+                $reflectedClass->getTraits()
+            )) {
                 $object = $reflectedClass->newInstance($this);
             } else {
                 $object = $this->resolveClass($reflectedClass, $fullyClassName);
@@ -269,4 +270,4 @@ namespace JayBeeR\YEDI {
             return $this->resolutionContainer->for($fullyClassName);
         }
     }
-} 
+}

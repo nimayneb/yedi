@@ -37,4 +37,4 @@ namespace JayBeeR\YEDI\Failures {
             // TODO: Implement describe() method.
         }
     }
-} 
+}
